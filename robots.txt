@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://techmaklabs.com/sitemap.xml
