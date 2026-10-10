@@ -47,7 +47,13 @@
     @media(max-width:900px){.nav-links{gap:16px}.hero-grid{grid-template-columns:1fr  .85fr;gap:22px}.hero-art{min-height:360px}.product-window{padding:17px}.chip-one{right:-5px}.chip-two{left:-6px}.feature-panel{grid-template-columns:1fr;gap:30px}.research-card{max-width:540px}.engage-grid,.faq-wrap{grid-template-columns:1fr;gap:30px}.engage-intro{max-width:650px}.footer-main{flex-direction:column}.footer-links{width:100%;justify-content:flex-start}}
     @media(max-width:680px){.container{width:min(var(--max),calc(100% - 32px))}.section{padding:72px 0}.nav{height:70px}.brand img{width:155px}.menu-toggle{display:block}.nav-links{display:none;position:absolute;left:16px;right:16px;top:64px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);align-items:stretch;gap:0;flex-direction:column}.nav-links.open{display:flex}.nav-links a{padding:12px 10px}.nav-links .nav-cta{margin-top:8px;text-align:center}.hero{padding:56px 0 52px}.hero-grid{grid-template-columns:1fr;gap:18px}.hero-copy h1{font-size:clamp(2.65rem,12vw,4rem)}.hero-copy>p{font-size:1.04rem}.hero-art{min-height:350px;margin:0 -3px}.orbit{width:320px}.product-window{width:min(90%,355px)}.chip-one{right:2%}.chip-two{left:1%}.scroll-cue{margin-top:26px}.capability-row{justify-content:flex-start;gap:13px 22px}.capability-row span{font-size:.82rem}.cards,.process-grid{grid-template-columns:1fr}.service-card{min-height:0}.feature-panel{border-radius:24px;padding:28px 22px}.feature-copy h2{font-size:2.35rem}.research-card{padding:17px}.bar{width:50px}.idea-form{padding:20px}.choice-grid{grid-template-columns:1fr}.form-bottom{align-items:flex-start}.form-help{max-width:100%}.footer-links{gap:24px;flex-wrap:wrap}.footer-col{min-width:120px}.footer-bottom{flex-direction:column}.section-heading{margin-bottom:28px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-  </style>
+  
+    @media (max-width: 700px) {
+      #games article { grid-template-columns: 1fr !important; }
+      #games article > div:last-child { min-height: 220px !important; }
+    }
+
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -55,7 +61,7 @@
     <a class="brand" href="#top" aria-label="Tech Mak Labs home"><img src="assets/techmaklabs-logo.png" alt="Tech Mak Labs — Build, Experiment, Launch"></a>
     <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="nav-links">☰</button>
     <nav class="nav-links" id="nav-links" aria-label="Main navigation">
-      <a href="#what-we-do">What we do</a><a href="#in-the-lab">In the lab</a><a href="#how-we-work">Our approach</a><a href="#faq">FAQ</a>
+      <a href="#what-we-do">What we do</a><a href="#in-the-lab">In the lab</a><a href="#games">Games</a><a href="#how-we-work">Our approach</a><a href="#faq">FAQ</a>
       <a class="button button-primary nav-cta" href="#share-idea">Share an idea <span class="arrow">↗</span></a>
     </nav>
   </div>
@@ -101,6 +107,45 @@
     <div class="feature-copy"><span class="eyebrow">A work in progress</span><div style="margin-top:15px"><span class="status">Early exploration</span></div><h2>Meet the idea behind <span class="gradient-text">Tech Mak Search.</span></h2><p>What if small businesses could see their digital visibility more clearly — who they're competing with, what content they're missing and which actions might make the biggest difference?</p><p>We're exploring a research workspace that brings competitor signals, keyword opportunities and practical next steps into one place. The aim is clarity, not another dashboard full of numbers.</p><ul class="feature-points"><li>Understand the competitive landscape</li><li>Find content and search visibility gaps</li><li>Turn research into a focused action plan</li></ul><a class="button button-light" href="#share-idea">Help shape the direction <span class="arrow">↗</span></a></div>
     <div class="research-card" aria-label="Illustrative concept interface for a research workspace"><div class="research-top"><strong>Opportunity workspace</strong><small>Concept preview</small></div><div class="research-row"><span class="rank-num">01</span><div class="research-info"><strong>Competitor landscape</strong><small>Know who is already answering the question</small></div><div class="bar"><i style="width:82%"></i></div></div><div class="research-row"><span class="rank-num">02</span><div class="research-info"><strong>Content opportunities</strong><small>Find useful topics worth covering</small></div><div class="bar"><i style="width:64%"></i></div></div><div class="research-row"><span class="rank-num">03</span><div class="research-info"><strong>Actionable next steps</strong><small>Prioritize work with a clear reason</small></div><div class="bar"><i style="width:74%"></i></div></div><div class="research-row"><span class="rank-num">04</span><div class="research-info"><strong>Visibility tracking</strong><small>Learn what changes over time</small></div><div class="bar"><i style="width:53%"></i></div></div><p style="font-size:.72rem;color:#9faac6;margin:16px 0 0">Illustrative interface only — not live analytics or product results.</p></div>
   </div></div></section>
+
+
+  <section class="section" id="games">
+    <div class="container">
+      <div class="section-heading">
+        <span class="eyebrow">Games &amp; experiments</span>
+        <h2>Small ideas. <span class="gradient-text">Playful discoveries.</span></h2>
+        <p>We make room for experiments that are curious, challenging and fun. Start with our first browser game.</p>
+      </div>
+      <article style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(22px,4vw,48px);align-items:center;padding:clamp(22px,4vw,42px);border:1px solid #e5e9f2;border-radius:24px;background:linear-gradient(135deg,#fffaf0,#f2f5ff);box-shadow:0 18px 50px rgba(20,32,65,.06)">
+        <div style="min-width:0">
+          <span class="status">Playable experiment</span>
+          <h3 style="font-size:clamp(28px,3vw,38px);line-height:1.1;margin:18px 0 12px;color:#111a32">Wormwood</h3>
+          <p style="color:#5c6677;line-height:1.75;margin:0 0 18px">A word-eating puzzle with a mischievous worm. Trace words, feed the worm and try to stop the rot from eating your book. How long can you keep the pages alive?</p>
+          <p style="font-size:13px;color:#737f94;margin:0 0 24px">WORD PUZZLE · PLAY IN YOUR BROWSER · NO ACCOUNT REQUIRED</p>
+          <a class="button button-primary" href="/wormwood-game/">Play Wormwood <span class="arrow">↗</span></a>
+        </div>
+        <div aria-label="Wormwood game preview" style="position:relative;overflow:hidden;min-height:260px;border-radius:20px;padding:24px;background:radial-gradient(circle at 85% 10%,#fff8db,transparent 40%),linear-gradient(145deg,#f7ecd4,#e5d09f);border:1px solid rgba(94,59,31,.15)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">
+            <div style="font-size:44px;line-height:1">🪱</div>
+            <div><div style="font-family:Georgia,serif;font-size:27px;font-weight:700;color:#5e3b1f">Wormwood</div><div style="font-size:12px;color:#725b3c">A word-eating puzzle</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;max-width:360px;margin:auto">
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">W</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">O</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#e0a83e;border-radius:8px;box-shadow:0 3px 0 #a9791f;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#3a2705">R</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">D</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">S</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">A</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">B</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">O</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">O</span>
+            <span style="display:grid;place-items:center;aspect-ratio:1;background:#fff9ea;border-radius:8px;box-shadow:0 3px 0 #b89a67;font-family:Georgia,serif;font-size:clamp(17px,2.4vw,25px);color:#5e3b1f">K</span>
+          </div>
+          <div style="position:absolute;right:16px;bottom:12px;font-size:12px;color:#725b3c">Trace a word. Feed the worm.</div>
+        </div>
+      </article>
+    </div>
+  </section>
 
   <section class="section" id="how-we-work"><div class="container"><div class="section-heading"><span class="eyebrow">Our approach</span><h2>Explore. Experiment. <span class="gradient-text">Evolve.</span></h2><p>Good products rarely appear fully formed. We prefer a thoughtful process that keeps the problem visible and makes room to learn along the way.</p></div><div class="process-grid"><article class="process-step"><div class="step-no">01</div><h3>Explore the problem</h3><p>Start with the people, the context and the friction. Get clear about what needs to improve before deciding what to build.</p><div class="process-line"></div></article><article class="process-step"><div class="step-no">02</div><h3>Experiment with ideas</h3><p>Make a small, testable version. Learn from real use, ask better questions and keep what genuinely helps.</p><div class="process-line"></div></article><article class="process-step"><div class="step-no">03</div><h3>Evolve what works</h3><p>Improve the experience with feedback, build carefully and grow the product at a pace that makes sense.</p><div class="process-line"></div></article></div></div></section>
 
