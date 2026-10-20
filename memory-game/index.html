@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Memory Match</title>
+<meta property="og:title" content="Memory Match – can you beat my time?">
+<meta property="og:description" content="A fun card-matching game for kids. Flip, match and earn stars and badges!">
+<meta property="og:type" content="website">
+<style>
+:root{--bg:#fff7e6;--fg:#3a2e1f;--card:#ffb703;--card2:#fb8500;--face:#fff;--ok:#8ecae6;--accent:#219ebc;--panel:#ffe9b8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1d1a26;--fg:#f5eee0;--card:#7b5cd6;--card2:#5a3fb5;--face:#2d2940;--ok:#2a6f5a;--accent:#9d8cf0;--panel:#2d2940}}
+:root[data-theme="dark"]{--bg:#1d1a26;--fg:#f5eee0;--card:#7b5cd6;--card2:#5a3fb5;--face:#2d2940;--ok:#2a6f5a;--accent:#9d8cf0;--panel:#2d2940}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Trebuchet MS","Comic Sans MS",system-ui,sans-serif;text-align:center;min-height:100vh}
+main{max-width:560px;margin:0 auto;padding:14px}
+h1{margin:6px 0;font-size:1.9rem}
+.bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:9px 15px;background:var(--accent);color:#fff;cursor:pointer}
+button.alt{background:transparent;color:var(--fg);border:2px solid var(--accent)}
+.stats{font-size:1.05rem;margin:8px 0}
+#board{display:grid;gap:8px;margin:12px 0}
+.card{aspect-ratio:1;perspective:600px;border:0;padding:0;background:none;border-radius:14px}
+.in{position:relative;width:100%;height:100%;transition:transform .35s;transform-style:preserve-3d}
+.card.flip .in,.card.done .in{transform:rotateY(180deg)}
+.f,.b{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.b{background:linear-gradient(135deg,var(--card),var(--card2));font-size:1.6rem;color:#fff}
+.f{background:var(--face);transform:rotateY(180deg);font-size:var(--es,2.6rem);border:3px solid var(--accent)}
+.card.done .f{background:var(--ok)}
+.panel{background:var(--panel);border-radius:18px;padding:14px;margin:12px 0}
+#win{display:none}
+#stars{font-size:2.4rem;letter-spacing:4px}
+.share{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.share button{padding:8px 12px;font-size:.9rem}
+#shelf{font-size:1.7rem;min-height:2rem;letter-spacing:4px}
+small{opacity:.8}
+</style>
+</head>
+<body>
+<main>
+<h1>🧠 Memory Match</h1>
+<div>Flip two cards and find all the pairs. Be quick to earn more stars!</div>
+<div class="bar" id="lv"></div>
+<div class="stats">⏱️ <b id="tm">0</b>s &nbsp;|&nbsp; Moves: <b id="mv">0</b> &nbsp;|&nbsp; Pairs: <b id="pr">0</b> &nbsp;|&nbsp; Best: <b id="bs">–</b></div>
+<div id="board"></div>
+<div id="win" class="panel">
+<div id="badge" style="font-size:1.3rem;font-weight:700"></div>
+<div id="stars"></div>
+<div id="sum"></div>
+<div class="share" id="share"></div>
+<small id="note"></small>
+</div>
+<button id="again">New game 🔄</button>
+<div class="panel"><b>My trophy shelf</b><div id="shelf">–</div><small>Finish levels to collect badges!</small>
+<div class="share">
+<button class="alt" id="bk">💾 Backup</button>
+<button class="alt" id="rs">📂 Restore</button>
+<button class="alt" id="cl">🗑️ Clear</button>
+<input type="file" id="fl" accept=".json,application/json" hidden>
+</div>
+<small id="dn"></small></div>
+</main>
+<script>
+const LV={
+ e:{n:"Easy",p:6,c:4,par:25,b:"🥉 Little Explorer"},
+ m:{n:"Medium",p:8,c:4,par:40,b:"🥈 Sharp Eyes"},
+ h:{n:"Hard",p:10,c:5,par:60,b:"🥇 Memory Star"},
+ x:{n:"Expert",p:12,c:6,par:80,b:"🏆 Brain Champion"},
+ z:{n:"Master",p:15,c:6,par:110,b:"👑 Memory Legend"}
+};
+const EMO=["🐶","🐱","🐸","🦊","🐼","🦁","🐵","🐰","🐯","🐙","🐢","🦄","🐧","🦋","🐳","🐞","🍎","🚀"];
+let level="e",first=null,lock=false,moves=0,pairs=0,total=0,secs=0,timer=null,started=false,last="";
+const $=id=>document.getElementById(id);
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k)||d)}catch(e){return JSON.parse(d)}}
+function lset(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function buildLevels(){
+  const bar=$("lv");bar.innerHTML="";
+  Object.keys(LV).forEach(k=>{const b=document.createElement("button");b.textContent=LV[k].n+" ("+LV[k].p*2+")";b.className=k===level?"":"alt";b.onclick=()=>{level=k;start()};bar.appendChild(b)});
+}
+function start(){
+  clearInterval(timer);timer=null;started=false;first=null;lock=false;moves=0;pairs=0;secs=0;total=LV[level].p;
+  $("win").style.display="none";buildLevels();
+  const bd=$("board");bd.innerHTML="";bd.style.gridTemplateColumns="repeat("+LV[level].c+",1fr)";
+  bd.style.setProperty("--es",LV[level].c>=6?"clamp(1.3rem,7vw,2.2rem)":"clamp(1.8rem,9vw,3rem)");
+  const deck=shuffle(shuffle(EMO.slice()).slice(0,total).flatMap(x=>[x,x]));
+  deck.forEach(e=>{
+    const c=document.createElement("button");c.className="card";c.setAttribute("aria-label","card");
+    c.dataset.e=e;c.innerHTML='<div class="in"><div class="b">?</div><div class="f">'+e+'</div></div>';
+    c.onclick=()=>flip(c);bd.appendChild(c);
+  });
+  upd();shelf();
+}
+function upd(){
+  $("tm").textContent=secs;$("mv").textContent=moves;$("pr").textContent=pairs+"/"+total;
+  const b=ls("mm_best","{}")[level];$("bs").textContent=b?b+"s":"–";
+}
+function shelf(){const s=ls("mm_badges","{}");$("shelf").textContent=Object.keys(LV).filter(k=>s[k]).map(k=>LV[k].b.split(" ")[0]).join(" ")||"–"}
+function flip(c){
+  if(lock||c.classList.contains("flip")||c.classList.contains("done"))return;
+  if(!started){started=true;timer=setInterval(()=>{secs++;upd()},1000)}
+  c.classList.add("flip");
+  if(!first){first=c;return}
+  moves++;
+  if(first.dataset.e===c.dataset.e){
+    first.classList.replace("flip","done");c.classList.replace("flip","done");first=null;pairs++;
+    if(pairs===total)finish();
+  }else{
+    lock=true;const a=first;first=null;
+    setTimeout(()=>{a.classList.remove("flip");c.classList.remove("flip");lock=false},750);
+  }
+  upd();
+}
+function finish(){
+  clearInterval(timer);
+  const par=LV[level].par,st=secs<=par?3:secs<=par*1.6?2:1;
+  const best=ls("mm_best","{}");if(!best[level]||secs<best[level]){best[level]=secs;lset("mm_best",best)}
+  const bd=ls("mm_badges","{}");bd[level]=Math.max(bd[level]||0,st);lset("mm_badges",bd);
+  const stars="⭐".repeat(st);
+  last="I finished "+LV[level].n+" level in "+secs+"s with "+stars+" on Memory Match! Can you beat me?";
+  $("badge").textContent="🎉 "+LV[level].b+" unlocked!";
+  $("stars").textContent=stars+"☆".repeat(3-st);
+  $("sum").textContent=secs+" seconds, "+moves+" moves. "+(st===3?"Lightning fast!":st===2?"Great job! Beat "+Math.round(par)+"s for 3 stars.":"Well done! Beat "+Math.round(par*1.6)+"s for 2 stars.");
+  $("win").style.display="block";shares();upd();shelf();
+}
+function shares(){
+  const url=location.href,t=encodeURIComponent(last),u=encodeURIComponent(url);
+  const sh=$("share");sh.innerHTML="";
+  const mk=(l,f)=>{const b=document.createElement("button");b.textContent=l;b.onclick=f;sh.appendChild(b)};
+  const open=h=>{try{window.open(h,"_blank","noopener")}catch(e){}};
+  if(navigator.share)mk("📤 Share",()=>{navigator.share({title:"Memory Match",text:last,url}).catch(()=>{})});
+  mk("💬 WhatsApp",()=>open("https://wa.me/?text="+t+"%20"+u));
+  mk("𝕏 Post",()=>open("https://twitter.com/intent/tweet?text="+t+"&url="+u));
+  mk("📘 Facebook",()=>open("https://www.facebook.com/sharer/sharer.php?u="+u+"&quote="+t));
+  mk("📋 Copy",()=>{const m=last+" "+url;try{navigator.clipboard.writeText(m).then(()=>$("note").textContent="Copied! Paste it anywhere.")}catch(e){$("note").textContent=m}});
+}
 
+function msg(t){$("dn").textContent=t}
+$("bk").onclick=()=>{
+  const data={app:"memory-match",v:1,best:ls("mm_best","{}"),badges:ls("mm_badges","{}")};
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  a.download="memory-match-progress.json";document.body.appendChild(a);a.click();a.remove();
+  msg("Backup saved to your downloads.");
+};
+$("rs").onclick=()=>$("fl").click();
+$("fl").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(d.app!=="memory-match")throw 0;
+      const best=ls("mm_best","{}"),bd=ls("mm_badges","{}");
+      Object.keys(LV).forEach(k=>{
+        const b=d.best&&d.best[k],s=d.badges&&d.badges[k];
+        if(Number.isFinite(b)&&b>0&&(!best[k]||b<best[k]))best[k]=Math.round(b);
+        if(Number.isInteger(s)&&s>=1&&s<=3&&(bd[k]||0)<s)bd[k]=s;
+      });
+      lset("mm_best",best);lset("mm_badges",bd);upd();shelf();
+      msg("Progress restored. Your better scores were kept.");
+    }catch(x){msg("Sorry, that file isn’t a Memory Match backup.")}
+    $("fl").value="";
+  };
+  r.readAsText(f);
+};
+$("cl").onclick=()=>{
+  if(!confirm("Clear all best times and badges on this device? This can’t be undone (unless you made a backup)."))return;
+  try{localStorage.removeItem("mm_best");localStorage.removeItem("mm_badges")}catch(e){}
+  upd();shelf();msg("Progress cleared.");
+};
+$("again").onclick=start;
+start();
+</script>
+</body>
+</html>
