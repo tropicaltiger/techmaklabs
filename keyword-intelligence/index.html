@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tech Mak Labs | Keyword Intelligence</title>
+<style>
+:root{--navy:#14213a;--blue:#315bd8;--bg:#f4f6fb;--card:#fff;--ink:#18243a;--muted:#69758a;--line:#e0e6ef;--green:#16794b;--amber:#946000;--red:#b42332}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.5 Arial,Helvetica,sans-serif;color:var(--ink)}header{background:var(--navy);color:white;padding:24px max(18px,calc((100% - 1240px)/2))}header .brand{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#adc0ff;font-weight:bold}h1{margin:5px 0;font-size:clamp(24px,3vw,34px)}header p{margin:0;color:#d4dced;max-width:800px}main{max-width:1240px;margin:20px auto;padding:0 16px 42px}.layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px;min-width:0;box-shadow:0 3px 14px #15233d08}.full{grid-column:1/-1}h2{font-size:17px;margin:0 0 4px}.desc{color:var(--muted);font-size:12px;margin:0 0 12px}label{display:block;font-weight:bold;font-size:12px;margin:10px 0 5px}input,textarea,select{width:100%;padding:10px;border:1px solid #ccd5e3;border-radius:8px;background:#fff;color:var(--ink);font:inherit}textarea{min-height:150px;resize:vertical}input[type=file]{font-size:12px}button{border:0;border-radius:8px;padding:10px 13px;background:var(--blue);color:#fff;font-weight:bold;cursor:pointer}button.secondary{background:#eef2f8;border:1px solid var(--line);color:#2a3851}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.status{margin-top:12px;padding:10px 12px;border:1px solid #d8e2ff;background:#f1f5ff;color:#35456d;border-radius:8px;font-size:12px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.metric{border:1px solid var(--line);background:#f9faff;border-radius:10px;padding:12px}.metric small{color:var(--muted);display:block;font-size:11px}.metric strong{font-size:24px;display:block;margin-top:3px}.tablebox{overflow:auto;border:1px solid var(--line);border-radius:9px}table{border-collapse:collapse;width:100%;min-width:900px}th,td{padding:9px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);font-size:12px}th{background:#f5f7fb;color:#46536b}tr:last-child td{border-bottom:0}.pill{display:inline-block;padding:3px 7px;border-radius:20px;font-size:10px;font-weight:bold;background:#edf0f5;color:#46536b}.green{background:#e4f6ec;color:var(--green)}.amber{background:#fff2d1;color:var(--amber)}.red{background:#ffe8eb;color:var(--red)}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.toolbar input{max-width:320px}.notice{font-size:12px;color:var(--muted);margin-top:10px}ul{margin:8px 0 0;padding-left:20px;color:#4e5a70}li{margin:5px 0}footer{font-size:11px;color:var(--muted);padding:14px 2px}.empty{text-align:center;color:var(--muted);padding:20px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.full{grid-column:auto}.metrics{grid-template-columns:repeat(2,1fr)}header{padding:20px 16px}}
+</style>
+</head>
+<body>
+<header><div class="brand">Tech Mak Labs · SEO intelligence</div><h1>Keyword Intelligence</h1><p>Validate target keywords with Search Console evidence, map queries to pages, and flag possible overlap before changing your SEO structure.</p></header>
+<main><div class="layout">
+<section class="card">
+<h2>1. Project & target keywords</h2><p class="desc">Starter project: DivineCare Physio. Replace the details and list to audit another website.</p>
+<label for="site">Website</label><input id="site" value="https://www.divinecarephysio.com/">
+<label for="location">Target location</label><input id="location" value="Langley, BC, Canada">
+<label for="targets">Target keywords (one per line)</label><textarea id="targets">physiotherapy langley
+physiotherapy near me
+physiotherapy clinic langley
+sports physiotherapy langley
+sports injury treatment langley bc
+sports rehab langley
+shockwave therapy langley
+shockwave therapy near me
+shockwave physiotherapy
+vestibular rehabilitation langley
+vertigo treatment langley
+bppv treatment near me
+balance physiotherapy
+dry needling langley
+ims treatment langley
+back pain physiotherapy langley
+sciatica treatment langley
+lower back pain treatment langley
+herniated disc physiotherapy langley
+neck pain physiotherapy langley
+shoulder physiotherapy langley
+frozen shoulder treatment langley
+rotator cuff injury physio langley
+whiplash physiotherapy langley
+knee pain physiotherapy langley
+plantar fasciitis treatment langley
+acl rehab physiotherapy langley
+ankle physiotherapy langley
+meniscus injury treatment langley
+post surgical physiotherapy langley
+knee replacement physiotherapy near me
+fracture rehabilitation
+neurological physiotherapy near me
+neuro physiotherapy near me
+bell's palsy treatment near me
+concussion physiotherapy langley
+icbc physiotherapy langley
+car accident physiotherapy langley
+concussion rehabilitation langley
+manual therapy langley
+tmj physiotherapy langley
+tmj physiotherapist
+myofascial release langley
+class 4 laser therapy near me
+acupuncture langley
+class iv laser therapy
+kinesiology taping near me
+active rehab langley
+direct billing physiotherapy langley
+icbc approved physio clinic langley</textarea>
+<div class="actions"><button id="apply">Update keywords</button><button class="secondary" id="exportKeywords">Export keywords CSV</button></div>
+</section>
+<section class="card">
+<h2>2. Import Search Console exports</h2><p class="desc">Export CSV from Search Console → Performance → Search results. Files are processed in your browser and not uploaded.</p>
+<label for="queriesFile">Queries CSV</label><input type="file" id="queriesFile" accept=".csv,text/csv">
+<label for="pagesFile">Pages CSV (optional)</label><input type="file" id="pagesFile" accept=".csv,text/csv">
+<label for="filteredFiles">Query-filtered Pages CSV files (optional, select multiple)</label><input type="file" id="filteredFiles" accept=".csv,text/csv" multiple>
+<p class="desc">For each target query: apply the query filter in Search Console, open Pages, export CSV, and name it like <code>physiotherapy-langley.csv</code>. You can import several filtered exports at once.</p>
+<div class="actions"><button id="importData" class="secondary">Import & analyse</button><button id="sample" class="secondary">Load sample</button></div>
+<div id="status" class="status">Ready. Use sample data to preview the report, or import your real CSV exports.</div>
+</section>
+<section class="card full"><h2>Overview</h2><p class="desc">Metrics are based only on imported Search Console data. Impressions are not the same as total keyword search volume.</p>
+<div class="metrics"><div class="metric"><small>Target keywords</small><strong id="targetCount">50</strong></div><div class="metric"><small>Exact query matches</small><strong id="matchedCount">0</strong></div><div class="metric"><small>Imported queries with impressions, 0 clicks</small><strong id="zeroCount">0</strong></div><div class="metric"><small>Query → URL rows</small><strong id="pairCount">0</strong></div></div></section>
+<section class="card full"><div class="toolbar"><div><h2>Keyword-to-page map</h2><p class="desc" style="margin:4px 0 0">Compare observed query metrics with the URLs associated with each query.</p></div><input id="filter" placeholder="Filter keyword, URL, or recommendation"></div>
+<div class="tablebox"><table><thead><tr><th>Target keyword</th><th>Intent</th><th>Clicks</th><th>Impressions</th><th>Avg. position</th><th>Observed URL(s)</th><th>Recommended next step</th></tr></thead><tbody id="results"></tbody></table></div><div class="actions"><button class="secondary" id="exportReport">Export analysis CSV</button></div></section>
+<section class="card full"><h2>Potential URL overlap</h2><p class="desc">Multiple URLs for one query are candidates for review, not automatic proof of keyword cannibalization.</p>
+<div class="tablebox"><table><thead><tr><th>Query</th><th>URLs found</th><th>Evidence</th><th>Recommended review</th></tr></thead><tbody id="overlaps"><tr><td colspan="4" class="empty">Import query-filtered Pages exports to populate this table.</td></tr></tbody></table></div></section>
+<section class="card full"><h2>How to interpret the results</h2><ul><li>A general Queries CSV and a general Pages CSV do not reveal which URL ranked for each individual query. Filtered Pages exports provide that relationship.</li><li>“Not observed” means absent from the uploaded export; it does not mean zero search demand.</li><li>This version does not fetch live rankings, competitor data, map-pack results or keyword volumes.</li><li>Do not redirect or delete a page based only on a possible overlap flag. Review search intent, URL history and page performance first.</li></ul></section>
+</div><footer>Tech Mak Labs · Keyword Intelligence · Deployable prototype v0.4</footer></main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);let targets=[],queries=[],pages=[],pairs=[];
+const norm=s=>String(s||'').toLowerCase().normalize('NFKD').replace(/[’']/g,"'").replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>Number(String(v||'').replace(/[, %]/g,''))||0;
+function parseCSV(text){let rows=[],row=[],cell='',quoted=false;text=text.replace(/^\uFEFF/,'');for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quoted&&text[i+1]==='"'){cell+='"';i++}else quoted=!quoted}else if(c===','&&!quoted){row.push(cell);cell=''}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell=''}else cell+=c}row.push(cell);if(row.some(v=>v.trim()))rows.push(row);if(rows.length<2)return[];const headers=rows.shift().map(v=>v.trim().toLowerCase());return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]||'').trim()])))}
+function value(o,terms){for(const term of terms){const key=Object.keys(o).find(k=>k===term||k.includes(term));if(key)return o[key]}return''}
+function parseQueries(rows){return rows.map(o=>({query:value(o,['top queries','query','queries']),clicks:num(value(o,['clicks'])),impressions:num(value(o,['impressions'])),position:num(value(o,['position']))})).filter(r=>r.query)}
+function parsePages(rows){return rows.map(o=>({page:value(o,['top pages','page','pages']),clicks:num(value(o,['clicks'])),impressions:num(value(o,['impressions'])),position:num(value(o,['position']))})).filter(r=>r.page)}
+function classify(k){const s=norm(k);if(s.includes('near me'))return'Local / near me';if(s.includes('langley'))return'Local service';if(/pain|injury|treatment|rehab|rehabilitation|vertigo|bppv|shoulder|sciatica|fracture|concussion|acl|meniscus/.test(s))return'Condition / treatment';return'Service / other'}
+function loadTargets(){const seen=new Set();targets=$('targets').value.split(/\r?\n/).map(v=>v.trim()).filter(v=>{const k=norm(v);if(!k||seen.has(k))return false;seen.add(k);return true});$('targetCount').textContent=targets.length}
+function metric(k){const rows=queries.filter(q=>norm(q.query)===norm(k));if(!rows.length)return null;let clicks=0,impressions=0,weighted=0;rows.forEach(r=>{clicks+=r.clicks;impressions+=r.impressions;weighted+=r.position*r.impressions});return{clicks,impressions,position:impressions?weighted/impressions:0}}
+function urls(k){return pairs.filter(p=>norm(p.query)===norm(k))}
+function action(k,m,u){if(!m)return'Not observed in this export; validate demand separately';if(u.length>1)return'Compare page intent and content before changing URLs';if(m.impressions&&m.clicks===0&&m.position<=20)return'Review intent match, title/snippet and conversion path';if(m.impressions&&m.clicks===0)return'Inspect the actual SERP and improve the relevant page';if(m.position>0&&m.position<=10)return'Protect visibility; review CTR and enquiries';return'Confirm target URL and improve relevant content'}
+function render(){let matched=0,zero=0;queries.forEach(q=>{if(q.impressions>0&&q.clicks===0)zero++});targets.forEach(k=>{if(metric(k))matched++});$('matchedCount').textContent=matched;$('zeroCount').textContent=zero;$('pairCount').textContent=pairs.length;const filter=norm($('filter').value);
+const data=targets.map(k=>({k,m:metric(k),u:urls(k)})).filter(x=>!filter||norm(x.k+' '+x.u.map(y=>y.page).join(' ')+' '+action(x.k,x.m,x.u)).includes(filter));
+$('results').innerHTML=data.map(({k,m,u})=>'<tr><td><b>'+esc(k)+'</b></td><td>'+classify(k)+'</td><td>'+(m?m.clicks:'—')+'</td><td>'+(m?m.impressions:'—')+'</td><td>'+(m&&m.position?m.position.toFixed(1):'—')+'</td><td>'+(u.length?u.map(x=>'<div style="margin-bottom:5px;overflow-wrap:anywhere">'+esc(x.page)+' <span class="pill">'+x.impressions+' impr.</span></div>').join(''):'<span class="pill amber">No URL mapping</span>')+'</td><td><span class="pill '+(u.length>1?'amber':m?'green':'')+'">'+(m?'GSC match':'Not observed')+'</span><div style="margin-top:5px">'+esc(action(k,m,u))+'</div></td></tr>').join('');
+const groups={};pairs.forEach(p=>{const key=norm(p.query);if(!groups[key])groups[key]={query:p.query,urls:[]};groups[key].urls.push(p.page)});const overlaps=Object.values(groups).filter(g=>new Set(g.urls).size>1);
+$('overlaps').innerHTML=overlaps.length?overlaps.map(g=>'<tr><td>'+esc(g.query)+'</td><td>'+[...new Set(g.urls)].map(esc).join('<br>')+'</td><td>'+new Set(g.urls).size+' distinct URLs in filtered exports</td><td>Check whether each URL serves a distinct search intent. Do not assume cannibalization.</td></tr>').join(''):'<tr><td colspan="4" class="empty">No multi-URL query groups found in the imported filtered exports.</td></tr>'}
+async function readFile(file){return file?parseCSV(await file.text()):[]}
+$('apply').onclick=()=>{loadTargets();render();$('status').textContent='Target keyword list updated.'};
+$('importData').onclick=async()=>{try{const q=await readFile($('queriesFile').files[0]),p=await readFile($('pagesFile').files[0]),files=[...$('filteredFiles').files];if(!q.length&&!p.length&&!files.length){$('status').textContent='Choose at least one CSV file first.';return}if(q.length)queries=parseQueries(q);if(p.length)pages=parsePages(p);pairs=[];for(const f of files){const rows=await readFile(f),parsed=parsePages(rows);let stem=f.name.replace(/\.csv$/i,'').replace(/[-_]+/g,' ').replace(/\b(pages?|performance|search results|gsc|export)\b/ig,' ').trim();let query=norm(stem);parsed.forEach(r=>pairs.push({query,page:r.page,clicks:r.clicks,impressions:r.impressions,position:r.position,source:f.name}))}loadTargets();render();$('status').textContent='Imported '+queries.length+' query rows, '+pages.length+' general page rows, and '+pairs.length+' query-to-URL rows. Filtered export filenames are used to identify queries.'}catch(e){$('status').textContent='Could not parse a file. Please use standard CSV exports from Search Console.'}};
+$('filter').addEventListener('input',render);
+function csv(v){return'"'+String(v??'').replace(/"/g,'""')+'"'}
+function download(name,content){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('exportKeywords').onclick=()=>download('techmak-target-keywords.csv',[['Keyword','Intent'],...targets.map(k=>[k,classify(k)])].map(r=>r.map(csv).join(',')).join('\r\n'));
+$('exportReport').onclick=()=>{const rows=[['Target keyword','Intent','Clicks','Impressions','Average position','Observed URLs','Recommended next step']];targets.forEach(k=>{const m=metric(k),u=urls(k);rows.push([k,classify(k),m?.clicks??'',m?.impressions??'',m?.position?m.position.toFixed(2):'',u.map(x=>x.page).join('; '),action(k,m,u)])});download('techmak-keyword-intelligence-report.csv',rows.map(r=>r.map(csv).join(',')).join('\r\n'))};
+$('sample').onclick=()=>{queries=[{query:'physiotherapy langley',clicks:0,impressions:399,position:28.51},{query:'sports physiotherapy langley',clicks:0,impressions:120,position:17.35},{query:'shockwave therapy langley',clicks:0,impressions:134,position:23.16}];pairs=[{query:'physiotherapy langley',page:'https://www.divinecarephysio.com/',impressions:296},{query:'physiotherapy langley',page:'https://www.divinecarephysio.com/best-physiotherapy-clinics-langley/',impressions:97},{query:'physiotherapy langley',page:'https://www.divinecarephysio.com/physiotherapy-langley/',impressions:27}];loadTargets();render();$('status').textContent='Demonstration data loaded. Replace it with real exports before making SEO decisions.'};
+loadTargets();render();
+})();
+</script>
+</body></html>
