@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signpost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --concrete:#E8EDE9;
+  --panel:#FFFFFF;
+  --ink:#0C1F18;
+  --ink-2:#3F524A;
+  --ink-3:#5E7068;
+  --line:#C9D5CE;
+  --green:#0E5A43;
+  --green-d:#093E2F;
+  --green-l:#E3F0E9;
+  --sodium:#FFC72C;
+  --sodium-l:#FFF5D3;
+  --alert:#A93220;
+  --alert-l:#FCEBE7;
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--concrete);color:var(--ink);font:400 15px/1.55 var(--f-body)}
+body.noscroll{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3,p,ul,ol{margin:0}
+ul,ol{padding:0;list-style:none}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px;box-shadow:0 0 0 2px var(--sodium)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:#fff;padding:8px 12px;border-radius:6px;z-index:100}
+.skip:focus{left:8px}
+
+/* sign plates */
+.sign{position:relative;background:var(--green);color:#fff;border-radius:14px}
+.sign::after{content:"";position:absolute;inset:6px;border:2px solid rgba(255,255,255,.9);border-radius:9px;pointer-events:none}
+.sign-brand{display:inline-flex;align-items:center;gap:10px;padding:9px 18px;border-radius:10px;font:700 22px/1 var(--f-display);letter-spacing:.09em;text-transform:uppercase}
+.sign-brand::after{inset:4px;border-width:1.5px;border-radius:7px}
+.sign-brand svg{width:20px;height:20px;flex:none}
+.sign-hero{padding:26px 32px 28px;margin-bottom:12px}
+.sign-eyebrow{font:500 11.5px/1 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:14px}
+.sign-line{display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;font:700 clamp(30px,4.6vw,54px)/1.04 var(--f-display);letter-spacing:.015em;text-transform:uppercase;overflow-wrap:anywhere}
+.sign-line svg{flex:none;width:.85em;height:.85em}
+.sign-ph{opacity:.55}
+
+/* page frame */
+.top{max-width:1240px;margin:0 auto;padding:22px 24px 18px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.top-tag{flex:1;min-width:220px;color:var(--ink-2);font-size:14px}
+.top-actions{display:flex;gap:8px}
+.shell{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;max-width:1240px;margin:0 auto;padding:0 24px 64px;align-items:start}
+.rail{position:sticky;top:20px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.rail-h{font:700 20px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+.hint{font-size:13px;color:var(--ink-2);margin-top:14px}
+.stage{min-width:0}
+
+/* fields and buttons */
+.field{display:block;margin-bottom:14px}
+.field>span{display:block;font:500 11.5px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:7px}
+.field input,.field select,.field textarea{width:100%;background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:11px 12px;line-height:1.3}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 15px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;border-radius:8px;padding:13px 18px;border:2px solid var(--green);transition:background .15s,color .15s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--green-d);border-color:var(--green-d)}
+.btn-ghost{background:transparent;color:var(--green)}
+.btn-ghost:hover:not(:disabled){background:var(--green-l)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-sm{padding:9px 13px;font-size:13.5px}
+.rail .btn{width:100%;margin-bottom:10px}
+.linkbtn{background:none;border:0;padding:0;color:var(--green);text-decoration:underline;text-underline-offset:2px;font-weight:600}
+.icon-btn{background:#fff;border:1.5px solid var(--line);border-radius:8px;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.icon-btn:hover{border-color:var(--ink)}
+.icon-btn svg{width:18px;height:18px}
+
+/* ratings */
+.rate{display:inline-flex;align-items:center;justify-content:center;min-width:64px;height:26px;padding:0 10px;border-radius:5px;font:700 13px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;border:2px solid;white-space:nowrap}
+.rate--high{background:var(--sodium);border-color:var(--ink);color:var(--ink)}
+.rate--medium{background:#fff;border-color:var(--green);color:var(--green)}
+.rate--low{background:transparent;border-color:var(--ink-3);color:var(--ink-3)}
+.rate--none{background:transparent;border:2px dashed var(--ink-3);color:var(--ink-3)}
+
+/* results */
+.status{font:500 12.5px/1.4 var(--f-mono);color:var(--ink-2);min-height:20px;margin:0 2px 22px}
+.status.err{color:var(--alert)}
+.status.ok{color:var(--green)}
+.block{margin-bottom:30px}
+.block-head{display:flex;align-items:center;justify-content:space-between;gap:12px 18px;flex-wrap:wrap;margin-bottom:10px}
+.block-title{display:flex;align-items:center;gap:10px}
+.block-h{font:700 24px/1 var(--f-display);letter-spacing:.07em;text-transform:uppercase}
+.count{font:500 12px/1 var(--f-mono);background:var(--ink);color:#fff;border-radius:4px;padding:4px 7px}
+.block-sub{font-size:13.5px;color:var(--ink-2);margin-bottom:12px}
+.picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.pick{display:flex;flex-direction:column;align-items:flex-start;gap:10px;width:100%;height:100%;text-align:left;background:var(--sodium-l);border:1.5px solid #E2B22A;border-radius:12px;padding:14px 16px}
+.pick:hover{border-color:var(--ink)}
+.pick-q{font-weight:600;font-size:16px;line-height:1.35}
+.pick-why{font:500 12px/1.4 var(--f-mono);color:var(--ink-2)}
+.filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex}
+.seg button{background:#fff;border:1.5px solid var(--line);padding:7px 12px;font:600 12.5px/1 var(--f-mono);margin-left:-1.5px}
+.seg button:first-child{border-radius:8px 0 0 8px;margin-left:0}
+.seg button:last-child{border-radius:0 8px 8px 0}
+.seg button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff;position:relative}
+.sel{background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font:500 12.5px/1 var(--f-mono)}
+.rows{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:80px minmax(0,1fr) 18px;gap:14px;align-items:center;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+.row:hover{border-color:var(--green);background:#F7FBF9}
+.row-main{display:block;min-width:0}
+.row-q{display:block;font-weight:600;font-size:15.5px;line-height:1.35}
+.row-meta{display:block;font:500 11.5px/1.3 var(--f-mono);color:var(--ink-3);margin-top:5px;overflow-wrap:anywhere}
+.chev{width:18px;height:18px;color:var(--ink-3)}
+.disclosure{display:flex;align-items:center;gap:10px;background:none;border:0;padding:6px 0;font:700 20px/1 var(--f-display);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px}
+.disclosure svg{width:18px;height:18px;transition:transform .15s}
+.disclosure[aria-expanded="true"] svg{transform:rotate(90deg)}
+.notice{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;margin-bottom:22px;font-size:14px}
+.notice--err{border-color:var(--alert);background:var(--alert-l)}
+.skel{height:58px;border-radius:10px;background:linear-gradient(90deg,#DCE4DF 25%,#EDF1EE 50%,#DCE4DF 75%);background-size:200% 100%;animation:sh 1.2s linear infinite;margin-bottom:8px}
+@keyframes sh{to{background-position:-200% 0}}
+.steps{display:grid;gap:10px;counter-reset:s;max-width:520px}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;font:700 16px/28px var(--f-display);text-align:center}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font:500 12px/1.5 var(--f-mono);color:var(--ink-3)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(12,31,24,.4);z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(540px,100vw);background:var(--panel);border-left:1px solid var(--line);box-shadow:-14px 0 40px rgba(12,31,24,.16);z-index:40;display:flex;flex-direction:column;transform:translateX(100%);visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
+.drawer.open{transform:none;visibility:visible;transition:transform .2s ease,visibility 0s}
+.dr-head{padding:18px 20px 14px}
+.dr-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.dr-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font:500 12px/1.3 var(--f-mono);color:var(--ink-2)}
+.dr-meta a{color:var(--green)}
+.dr-title{font:700 28px/1.1 var(--f-display);letter-spacing:.01em;margin-bottom:10px}
+.dr-context{font-size:13.5px;color:var(--ink-2)}
+.tabs{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--line)}
+.tabs.single{display:none}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:12px 12px 10px;font:700 15px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tab[aria-selected="true"]{color:var(--green);border-bottom-color:var(--green)}
+.dr-body{flex:1;overflow:auto;padding:20px}
+.panel-lead{font-size:14px;color:var(--ink-2);margin-bottom:16px}
+.out{margin-top:20px}
+.loading{font:500 12.5px/1.4 var(--f-mono);color:var(--ink-3)}
+.err-line{font-size:14px;color:var(--alert);background:var(--alert-l);border-radius:8px;padding:10px 12px}
+.post{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:16px}
+.post-text{white-space:pre-wrap;font-size:15px;line-height:1.55;overflow-wrap:anywhere}
+.post-text mark{background:var(--sodium-l);color:inherit;box-shadow:inset 0 -2px 0 var(--sodium)}
+.cta-chip{display:inline-block;margin-top:14px;border:1.5px solid var(--green);color:var(--green);border-radius:6px;padding:6px 14px;font:700 13px/1 var(--f-display);letter-spacing:.09em;text-transform:uppercase}
+.meter{display:flex;align-items:center;gap:12px;margin:12px 0 4px;font:500 12px/1 var(--f-mono);color:var(--ink-2)}
+.meter-bar{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.meter-bar i{display:block;height:100%;background:var(--green)}
+.meter.over{color:var(--alert)}
+.meter.over .meter-bar i{background:var(--alert)}
+.legend{font-size:12.5px;color:var(--ink-3);margin-bottom:14px}
+.legend mark{background:var(--sodium-l);box-shadow:inset 0 -2px 0 var(--sodium)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.article{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:18px 20px;font-size:15px}
+.article h3{font:700 20px/1.15 var(--f-display);letter-spacing:.05em;text-transform:uppercase;color:var(--green);margin:22px 0 6px}
+.article>*:first-child{margin-top:0}
+.article p{margin:0 0 12px}
+.article ul{list-style:disc;padding-left:20px;margin:0 0 12px}
+.article li{margin-bottom:6px}
+.article strong{font-weight:600;background:linear-gradient(transparent 58%,var(--sodium) 58%)}
+.res h3{font:700 17px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin:18px 0 6px}
+.res h3:first-child{margin-top:0}
+.res p{margin:0 0 6px}
+.res ul{list-style:disc;padding-left:20px}
+.trunc{font-size:13px;color:var(--alert);margin-top:10px}
+
+/* text fallback dialog */
+.modal-ov{position:fixed;inset:0;background:rgba(12,31,24,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:14px;max-width:640px;width:100%;padding:20px}
+.modal h2{font:700 22px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.modal p{font-size:13.5px;color:var(--ink-2);margin-bottom:12px}
+.modal textarea{width:100%;height:260px;border:1.5px solid var(--line);border-radius:8px;padding:10px;font:400 12px/1.5 var(--f-mono)}
+.modal .actions{margin-top:12px}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;padding:0 16px 48px;gap:20px}
+  .rail{position:static}
+  .top{padding:16px}
+  .top-tag{display:none}
+  .top-actions{margin-left:auto}
+}
+@media (max-width:560px){
+  .row{grid-template-columns:70px minmax(0,1fr) 16px;gap:10px}
+  .sign-hero{padding:20px 20px 22px}
+  .dr-title{font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#results">Skip to results</a>
+
+<header class="top">
+  <div class="sign sign-brand" aria-label="Signpost">
+    <span id="brandName">Signpost</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M3 12h16M13 5l7 7-7 7"/></svg>
+  </div>
+  <p class="top-tag">Find the question a local customer is really asking, then answer it.</p>
+  <div class="top-actions">
+    <button type="button" class="btn btn-ghost btn-sm" id="exportCsv" disabled>Export CSV</button>
+    <button type="button" class="btn btn-ghost btn-sm" id="exportPdf" disabled>Export PDF</button>
+  </div>
+</header>
+
+<main class="shell">
+  <aside class="rail" aria-label="Client details">
+    <h2 class="rail-h">Client</h2>
+    <label class="field"><span>Business name</span><input id="bizInput" type="text" autocomplete="off" placeholder="e.g. Divinecare Physiotherapy"></label>
+    <label class="field"><span>Service or keyword</span><input id="kwInput" type="text" autocomplete="off" placeholder="e.g. neck pain treatment"></label>
+    <label class="field"><span>City or area</span><input id="cityInput" type="text" autocomplete="off" placeholder="e.g. Langley, BC"></label>
+    <button type="button" class="btn btn-primary" id="goBtn">Find questions</button>
+    <button type="button" class="btn btn-ghost" id="gbpDirectBtn">Write a Business Profile post</button>
+    <p class="hint">The business and city carry into every post and article you write.</p>
+  </aside>
+
+  <section class="stage" id="results" tabindex="-1" aria-label="Results">
+    <div class="sign sign-hero" id="destSign">
+      <div class="sign-eyebrow">Local question search</div>
+      <div class="sign-line">
+        <span id="signKw" class="sign-ph">Your service</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M3 12h16M13 5l7 7-7 7"/></svg>
+        <span id="signCity" class="sign-ph">Your city</span>
+      </div>
+    </div>
+    <div class="status" id="statusText" role="status" aria-live="polite"></div>
+    <div id="resultsBody"></div>
+    <p class="foot">Ratings are a judgment from live search results, not a ranking guarantee. Read every draft before you publish it.</p>
+  </section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true">
+  <div class="dr-head">
+    <div class="dr-top">
+      <div class="dr-meta" id="drMeta"></div>
+      <button type="button" class="icon-btn" id="drClose" aria-label="Close panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      </button>
+    </div>
+    <h2 class="dr-title" id="drawerTitle"></h2>
+    <p class="dr-context" id="drContext"></p>
+  </div>
+  <div class="tabs" id="drTabs" role="tablist" aria-label="What to do with this question"></div>
+  <div class="dr-body" id="drBody"></div>
+</aside>
+<div id="modalRoot"></div>
+
+<script>
+/*CONFIG_START*/
+const CONFIG = {
+  "brand": "Signpost",
+  "apiUrl": "/api/generate",
+  "model": "",
+  "maxTokens": 2000,
+  "blogWords": "500 to 650"
+};
+/*CONFIG_END*/
+
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeUrl = u => { try{ const x = new URL(u); return (x.protocol === 'http:' || x.protocol === 'https:') ? x.href : null; }catch(e){ return null; } };
+const noDashes = s => String(s).replace(/(\d)\s*[–—]\s*(\d)/g, '$1 to $2').replace(/\s*[–—]\s*/g, ', ');
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+};
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M3 12h16M13 5l7 7-7 7"/></svg>';
+const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+
+const INTENTS = {
+  definition:'definition', howto:'how-to', buying:'buying', comparison:'comparison',
+  concern:'concern', opinion:'opinion', troubleshooting:'troubleshooting',
+  beginner:'beginner', local:'near me', other:'other'
+};
+const normIntent = v => {
+  v = String(v || '').toLowerCase().replace(/[^a-z]/g, '');
+  if(v === 'safety') v = 'concern';
+  return INTENTS[v] ? v : 'other';
+};
+const CTAS = ['Book','Order online','Buy','Learn more','Sign up','Get offer','Call now'];
+
+const state = { svc:'', city:'', dataset:[], liveStatus:'idle', liveError:'', ratingFilter:'all', intentFilter:'all', showTemplates:false };
+let runToken = 0, drawerToken = 0, lastTrigger = null;
+
+/* ---------- model calls ---------- */
+async function callClaude(prompt, opts){
+  const search = !!(opts && opts.search);
+  let res;
+  if(CONFIG.apiUrl){
+    res = await fetch(CONFIG.apiUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ prompt, useSearch: search }) });
+  } else {
+    const body = { model: CONFIG.model, max_tokens: CONFIG.maxTokens, messages:[{ role:'user', content: prompt }] };
+    if(search) body.tools = [{ type:'web_search_20250305', name:'web_search' }];
+    res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  }
+  let data;
+  try{ data = await res.json(); }catch(e){ throw new Error('The service sent back something unreadable. Try again.'); }
+  if(!res.ok){
+    let m = (data && data.error && data.error.message != null) ? data.error.message : (data && data.message != null ? data.message : JSON.stringify(data));
+    throw new Error(typeof m === 'string' ? m : JSON.stringify(m));
+  }
+  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  if(!text.trim()) throw new Error('The service sent back no text. Try again.');
+  return { text, truncated: data.stop_reason === 'max_tokens' };
+}
+function friendly(err){
+  const m = (err && err.message) ? String(err.message) : String(err);
+  if(m.indexOf('exceeded_limit') !== -1){
+    const t = m.match(/"resetsAt":\s*(\d+)/);
+    const when = t ? new Date(Number(t[1]) * 1000).toLocaleString() : null;
+    return 'The free Claude usage limit is used up for now.' + (when ? ' It resets around ' + when + '.' : ' Try again later.');
+  }
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'Could not reach the service. Check your connection and try again.';
+  return m;
+}
+function extractJSON(text, isArray){
+  const clean = text.replace(/```json|```/g, '').trim();
+  const a = clean.indexOf(isArray ? '[' : '{');
+  const b = isArray ? clean.lastIndexOf(']') : clean.lastIndexOf('}');
+  if(a === -1 || b < a) throw new Error('The answer did not come back in the expected format. Try again.');
+  try{ return JSON.parse(clean.slice(a, b + 1)); }
+  catch(e){ throw new Error('The answer came back garbled. Try again.'); }
+}
+const ALLOWED = new Set(['P','H2','H3','H4','UL','OL','LI','STRONG','B','EM','I','BR']);
+function sanitizeHtml(dirty){
+  const doc = new DOMParser().parseFromString(String(dirty), 'text/html');
+  const out = document.createElement('div');
+  (function walk(src, dst){
+    src.childNodes.forEach(n => {
+      if(n.nodeType === 3){ dst.appendChild(document.createTextNode(n.nodeValue)); }
+      else if(n.nodeType === 1){
+        if(ALLOWED.has(n.tagName)){ const el = document.createElement(n.tagName); walk(n, el); dst.appendChild(el); }
+        else if(['SCRIPT','STYLE','IFRAME','OBJECT','EMBED','TEMPLATE','NOSCRIPT'].indexOf(n.tagName) === -1){ walk(n, dst); }
+      }
+    });
+  })(doc.body, out);
+  return out.innerHTML;
+}
+
+/* ---------- prompts ---------- */
+const VOICE_BAN = 'Avoid these AI tells: "in today\'s fast-paced world", "delve", "navigate", "unlock", "elevate", "it\'s important to note", "whether you\'re", "look no further", "we are thrilled", "top-notch", "state-of-the-art", "premier".';
+function searchPrompt(svc, city){
+  return 'Search the web for real questions people ask when looking for "' + svc + '"' + (city ? ' in ' + city : '') + '. Use one search, then reply right away.\n' +
+  'Reply with ONLY a raw JSON array, nothing before or after it, no markdown fences. Exactly 10 items, each shaped like:\n' +
+  '{"question":"...","intent":"definition|howto|buying|comparison|concern|opinion|troubleshooting|beginner|local|other","domain":"site domain, e.g. reddit.com","url":"source url","opportunity":"high|medium|low","reason":"under 8 words"}\n' +
+  'Prefer questions a local customer would actually type. Rate "opportunity" by how often the question comes up against how thin or generic the current answers look. Be conservative: most items should be medium or low. Only include a domain and url you actually found. Keep every field short. Output the JSON array now.';
+}
+function researchPrompt(item, ctx){
+  return 'Research this search question: "' + item.question + '"' + (ctx.city ? ' (local area: ' + ctx.city + ')' : '') + '. Use one search, then reply right away.\n' +
+  'Reply with ONLY JSON, nothing before or after it, no fences: {"summary":"2 short sentences on what currently answers this and whether it looks thin or thorough","competitors":["up to 3 site domains that currently answer it"],"related":["up to 3 related questions"],"reason":"one short sentence on why this is rated ' + (item.opportunity || 'medium') + ' opportunity"}. Output the JSON now.';
+}
+function gbpPrompt(item, ctx, angle, cta, previous){
+  return 'Write a Google Business Profile post for a local business.\n' +
+  'Business: ' + (ctx.biz || '(not given, write for a local business in this field)') + '\n' +
+  'Service or keyword: ' + ctx.svc + '\n' +
+  'Location: ' + (ctx.city || '(not given)') + '\n' +
+  (item ? 'Question this post should speak to: "' + item.question + '"\n' : '') +
+  'Angle: ' + (angle || '(none given, write a helpful awareness post)') + '\n' +
+  'The post will have a "' + cta + '" button. Google shows the button separately, so do not write it as a sentence.\n' +
+  (previous.length ? 'Earlier posts for this business, take a clearly different angle and opening:\n' + previous.map(p => '- ' + p.slice(0, 90)).join('\n') + '\n' : '') +
+  '\nRules, follow them exactly:\n' +
+  '- Write 150 to 300 characters. The hard limit is 1500.\n' +
+  '- Only the first 100 characters show before "more", so lead with the most useful or specific point.\n' +
+  '- Plain text only. No markdown, no HTML, no hashtags, no emojis.\n' +
+  '- Never use em dashes or en dashes. Use periods or commas.\n' +
+  '- Mention the location once and the service once, naturally. No stuffing.\n' +
+  '- Write like the owner talking to a neighbour. Specific and plain, never hypey. ' + VOICE_BAN + '\n' +
+  '- Do not repeat the question word for word.\n' +
+  '- Reply with only the post text.';
+}
+function blogPrompt(item, ctx, kws){
+  return 'Write a section of a web page (' + CONFIG.blogWords + ' words) that answers this search question directly: "' + item.question + '".\n' +
+  'Business: ' + (ctx.biz || '(not given, write for a local business in this field)') + '\n' +
+  'Service or keyword: ' + ctx.svc + '\n' +
+  'Location: ' + (ctx.city || '(not given)') + '\n' +
+  'Keywords to work in naturally, no stuffing: ' + (kws || '(none given)') + '\n' +
+  'Opportunity note: this question was rated ' + (item.opportunity || 'medium') + (item.reason ? ' because ' + item.reason : '') + '.\n\n' +
+  'Voice: a knowledgeable local professional speaking to the one person who typed that question. Concrete and specific, no filler. ' + VOICE_BAN + ' No closing paragraph that repeats the page.\n' +
+  'Rules, follow them exactly:\n' +
+  '- Reply with only HTML using these tags: p, h3, ul, li, strong. No html or body wrapper, no markdown fences, no notes before or after.\n' +
+  '- Never use em dashes or en dashes. Use periods or commas. Write number ranges as "4 to 6".\n' +
+  '- Start with one <p> that answers the question within its first two sentences.\n' +
+  '- Then 2 or 3 <h3> subtitles, each followed by a short <p>.\n' +
+  '- Then one <ul> of 3 to 5 <li> takeaways for quick scanning.\n' +
+  '- Wrap phrases worth linking to other pages on the business\'s site in <strong>.\n' +
+  '- End with <h3>Suggested links to add</h3> and a <ul> where each <li> starts with one of the <strong> phrases and adds a short, qualitative reason to link it (matches buying intent, a service page, a common search). Do not invent traffic numbers or percentages.\n' +
+  '- Do not repeat the question as a heading.';
+}
+
+/* ---------- template ideas ---------- */
+function genTemplates(svc, city){
+  const inCity = city ? ' in ' + city : '';
+  const near = city || 'me';
+  const list = [
+    ['near', svc + ' near ' + near, 'local'],
+    ['best', 'best ' + svc + inCity, 'buying'],
+    ['who', 'who offers ' + svc + inCity, 'buying'],
+    ['cost', 'how much does ' + svc + ' cost' + inCity, 'buying'],
+    ['choose', 'how to choose ' + svc + inCity, 'howto'],
+    ['what', 'what is ' + svc, 'definition'],
+    ['expect', 'what to expect from ' + svc + inCity, 'beginner'],
+    ['when', 'when should I book ' + svc, 'howto'],
+    ['long', 'how long does ' + svc + ' take', 'howto'],
+    ['worth', 'is ' + svc + ' worth it', 'opinion'],
+    ['ins', 'does insurance cover ' + svc, 'concern'],
+    ['open', svc + inCity + ' open today', 'local'],
+    ['new', svc + inCity + ' accepting new clients', 'local'],
+    ['reviews', svc + inCity + ' reviews', 'comparison'],
+    ['vs', svc + ' vs other options' + inCity, 'comparison'],
+    ['mistakes', 'common mistakes when booking ' + svc, 'concern'],
+    ['ask', 'questions to ask before booking ' + svc, 'howto'],
+    ['first', 'first time booking ' + svc + inCity, 'beginner']
+  ];
+  return list.map(([id, q, intent]) => ({ id:'t_' + id, question:q, intent, source:'template', domain:null, url:null, opportunity:null, reason:null }));
+}
+
+/* ---------- rendering: results ---------- */
+const OPP_RANK = { high:0, medium:1, low:2 };
+const byOpp = (a, b) => (OPP_RANK[a.opportunity] == null ? 3 : OPP_RANK[a.opportunity]) - (OPP_RANK[b.opportunity] == null ? 3 : OPP_RANK[b.opportunity]);
+
+function rateHTML(d){
+  if(!d.opportunity) return '<span class="rate rate--none" title="Template idea, not rated">Idea</span>';
+  const label = { high:'High', medium:'Medium', low:'Low' }[d.opportunity];
+  return '<span class="rate rate--' + d.opportunity + '" title="' + label + ' opportunity">' + label + '</span>';
+}
+function rowHTML(d){
+  const meta = [INTENTS[d.intent], d.source === 'live' ? (d.domain || 'web') : 'template idea'].join(' · ');
+  return '<li><button type="button" class="row" data-open="' + esc(d.id) + '">' + rateHTML(d) +
+    '<span class="row-main"><span class="row-q">' + esc(d.question) + '</span><span class="row-meta">' + esc(meta) + '</span></span>' + CHEV + '</button></li>';
+}
+function picksHTML(high){
+  return '<section class="block" aria-labelledby="picksH"><div class="block-head"><div class="block-title"><h2 class="block-h" id="picksH">Start here</h2><span class="count">' + high.length + '</span></div></div>' +
+    '<p class="block-sub">Rated high: asked often, with thin or generic answers today.</p><ul class="picks">' +
+    high.map(d => '<li><button type="button" class="pick" data-open="' + esc(d.id) + '">' + rateHTML(d) + '<span class="pick-q">' + esc(d.question) + '</span>' + (d.reason ? '<span class="pick-why">' + esc(d.reason) + '</span>' : '') + '</button></li>').join('') +
+    '</ul></section>';
+}
+function listHTML(live){
+  const counts = { all: live.length, high: 0, medium: 0, low: 0 };
+  live.forEach(d => { if(counts[d.opportunity] != null) counts[d.opportunity]++; });
+  const intents = Array.from(new Set(live.map(d => d.intent)));
+  const filtered = live.filter(d => (state.ratingFilter === 'all' || d.opportunity === state.ratingFilter) && (state.intentFilter === 'all' || d.intent === state.intentFilter)).sort(byOpp);
+  const seg = ['all','high','medium','low'].map(k => '<button type="button" id="rate_' + k + '" data-rate="' + k + '" aria-pressed="' + (state.ratingFilter === k) + '">' + (k === 'all' ? 'All' : k[0].toUpperCase() + k.slice(1)) + ' ' + counts[k] + '</button>').join('');
+  const sel = '<select class="sel" id="intentSel" aria-label="Filter by topic"><option value="all">All topics</option>' + intents.map(i => '<option value="' + i + '"' + (state.intentFilter === i ? ' selected' : '') + '>' + esc(INTENTS[i]) + '</option>').join('') + '</select>';
+  return '<section class="block" aria-labelledby="allH"><div class="block-head"><div class="block-title"><h2 class="block-h" id="allH">Real questions</h2><span class="count">' + live.length + '</span></div>' +
+    '<div class="filters"><div class="seg" role="group" aria-label="Filter by rating">' + seg + '</div>' + sel + '</div></div>' +
+    (filtered.length ? '<ul class="rows">' + filtered.map(rowHTML).join('') + '</ul>' : '<p class="block-sub">Nothing matches those filters.</p>') + '</section>';
+}
+function templatesHTML(tmpl){
+  return '<section class="block"><button type="button" class="disclosure" id="toggleTemplates" aria-expanded="' + state.showTemplates + '">' + CHEV + 'Template ideas <span class="count">' + tmpl.length + '</span></button>' +
+    (state.showTemplates ? '<p class="block-sub">Common local phrasings. These are not rated, so check them before you commit time.</p><ul class="rows">' + tmpl.map(rowHTML).join('') + '</ul>' : '') + '</section>';
+}
+function emptyHTML(){
+  return '<section class="block"><h2 class="block-h" style="margin-bottom:14px">How it works</h2><ol class="steps">' +
+    '<li><span>Enter the business, the service and the city on the left.</span></li>' +
+    '<li><span>Pick a question rated High. These are the ones worth your time.</span></li>' +
+    '<li><span>Write a Business Profile post or an article for that one question.</span></li></ol></section>';
+}
+function renderResults(){
+  const body = $('#resultsBody');
+  const active = document.activeElement;
+  const focusId = active && active.id && body.contains(active) ? active.id : null;
+  if(!state.dataset.length && state.liveStatus === 'idle'){ body.innerHTML = emptyHTML(); return; }
+  const live = state.dataset.filter(d => d.source === 'live');
+  const tmpl = state.dataset.filter(d => d.source === 'template');
+  let html = '';
+  if(state.liveStatus === 'loading'){
+    html += '<section class="block" aria-busy="true"><h2 class="block-h" style="margin-bottom:12px">Real questions</h2>' + '<div class="skel"></div>'.repeat(5) + '</section>';
+  } else if(state.liveStatus === 'error'){
+    html += '<div class="notice notice--err" role="alert"><span><strong>Could not load real questions.</strong> ' + esc(state.liveError) + '</span><button type="button" class="btn btn-ghost btn-sm" id="retryBtn">Try again</button></div>';
+  }
+  if(live.length){
+    const high = live.filter(d => d.opportunity === 'high').sort(byOpp);
+    if(high.length) html += picksHTML(high);
+    html += listHTML(live);
+  }
+  if(tmpl.length) html += templatesHTML(tmpl);
+  body.innerHTML = html;
+  if(focusId){ const el = document.getElementById(focusId); if(el) el.focus(); }
+}
+function setStatus(text, kind, html){
+  const el = $('#statusText');
+  el.className = 'status' + (kind ? ' ' + kind : '');
+  if(html) el.innerHTML = text; else el.textContent = text;
+}
+function updateSign(){
+  const svc = $('#kwInput').value.trim(), city = $('#cityInput').value.trim();
+  $('#signKw').textContent = svc || 'Your service';
+  $('#signKw').classList.toggle('sign-ph', !svc);
+  $('#signCity').textContent = city || 'Your city';
+  $('#signCity').classList.toggle('sign-ph', !city);
+}
+function updateExportButtons(){
+  const has = state.dataset.length > 0;
+  $('#exportCsv').disabled = !has; $('#exportPdf').disabled = !has;
+}
+function getCtx(){ return { biz: $('#bizInput').value.trim(), svc: $('#kwInput').value.trim(), city: $('#cityInput').value.trim() }; }
+
+/* ---------- search flow ---------- */
+async function run(){
+  const svc = $('#kwInput').value.trim(), city = $('#cityInput').value.trim();
+  if(!svc){ setStatus('Enter a service or keyword first.', 'err'); $('#kwInput').focus(); return; }
+  const myRun = ++runToken;
+  state.svc = svc; state.city = city;
+  state.dataset = genTemplates(svc, city);
+  state.liveStatus = 'loading'; state.liveError = '';
+  state.ratingFilter = 'all'; state.intentFilter = 'all'; state.showTemplates = false;
+  closeDrawer(true);
+  updateExportButtons(); renderResults();
+  setStatus('Searching the web for real questions...', '');
+  $('#goBtn').disabled = true;
+  try{
+    const r = await callClaude(searchPrompt(svc, city), { search:true });
+    if(myRun !== runToken) return;
+    if(r.truncated) throw new Error('The answer was cut off before it finished. Try again.');
+    const arr = extractJSON(r.text, true);
+    const live = (Array.isArray(arr) ? arr : []).filter(x => x && typeof x.question === 'string' && x.question.trim()).slice(0, 12).map((x, i) => ({
+      id:'l' + i, question:x.question.trim(), intent:normIntent(x.intent), source:'live',
+      domain: typeof x.domain === 'string' ? x.domain : null, url: safeUrl(x.url),
+      opportunity: ['high','medium','low'].indexOf(x.opportunity) !== -1 ? x.opportunity : 'medium',
+      reason: typeof x.reason === 'string' ? x.reason : null
+    }));
+    if(!live.length) throw new Error('No questions came back. Try a different keyword.');
+    state.dataset = live.concat(state.dataset);
+    state.liveStatus = 'done';
+    setStatus(live.length + ' real questions found, plus ' + (state.dataset.length - live.length) + ' template ideas.', 'ok');
+  }catch(err){
+    if(myRun !== runToken) return;
+    console.error(err);
+    state.liveStatus = 'error'; state.liveError = friendly(err);
+    setStatus('Template ideas are ready. Real questions could not be loaded.', 'err');
+  }finally{
+    if(myRun === runToken) $('#goBtn').disabled = false;
+  }
+  renderResults(); updateExportButtons();
+}
+
+/* ---------- drawer ---------- */
+function sourceHTML(item){
+  const u = item.url ? safeUrl(item.url) : null;
+  if(item.source !== 'live') return '<span>template idea</span>';
+  return u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(item.domain || 'source') + ' ↗</a>' : '<span>' + esc(item.domain || 'web') + '</span>';
+}
+function panelHTML(id, item, ctx){
+  if(id === 'gbp'){
+    return '<p class="panel-lead">A short post for the Google Business Profile, written to fit Google\'s limits.</p>' +
+      '<label class="field"><span>Angle (optional)</span><input id="gbpAngle" type="text" placeholder="e.g. new client offer, weekend hours, a common mistake"></label>' +
+      '<label class="field"><span>Button on the post</span><select id="gbpCta">' + CTAS.map(c => '<option>' + c + '</option>').join('') + '</select></label>' +
+      '<button type="button" class="btn btn-primary" id="gbpGo">Write post</button><div class="out" id="gbpOut" aria-live="polite"></div>';
+  }
+  if(id === 'blog'){
+    return '<p class="panel-lead">A section for the business website that answers this exact question.</p>' +
+      '<label class="field"><span>Keywords to work in (optional)</span><input id="blogKw" type="text" value="' + esc([ctx.svc, ctx.city].filter(Boolean).join(', ')) + '"></label>' +
+      '<button type="button" class="btn btn-primary" id="blogGo">Write article</button><div class="out" id="blogOut" aria-live="polite"></div>';
+  }
+  return '<p class="panel-lead">See who already answers this question and how thorough they are. Uses one web search.</p>' +
+    '<button type="button" class="btn btn-primary" id="resGo">Research this question</button><div class="out" id="resOut" aria-live="polite"></div>';
+}
+function openDrawer(item, trigger){
+  const token = ++drawerToken;
+  lastTrigger = trigger || document.activeElement;
+  const ctx = getCtx();
+  const standalone = !item;
+  const tabs = standalone ? [['gbp','Profile post']] : [['gbp','Profile post'], ['blog','Article'], ['research','Research']];
+  $('#drMeta').innerHTML = standalone ? '<span class="rate rate--none">New post</span>' : rateHTML(item) + '<span>' + esc(INTENTS[item.intent]) + '</span>' + sourceHTML(item);
+  $('#drawerTitle').textContent = standalone ? 'Business Profile post: ' + ctx.svc + (ctx.city ? ' in ' + ctx.city : '') : item.question;
+  $('#drContext').innerHTML = 'Writing for <strong>' + esc(ctx.biz || 'your business') + '</strong>' + (ctx.city ? ' in <strong>' + esc(ctx.city) + '</strong>' : '') + '. <button type="button" class="linkbtn" id="drChange">Change details</button>';
+  const tabsEl = $('#drTabs');
+  tabsEl.className = 'tabs' + (tabs.length === 1 ? ' single' : '');
+  tabsEl.innerHTML = tabs.map(([id, label], i) => '<button type="button" role="tab" class="tab" id="tab-' + id + '" data-tab="' + id + '" aria-controls="panel-' + id + '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? 0 : -1) + '">' + label + '</button>').join('');
+  $('#drBody').innerHTML = tabs.map(([id], i) => '<section class="panel" id="panel-' + id + '" role="tabpanel" aria-labelledby="tab-' + id + '"' + (i === 0 ? '' : ' hidden') + '>' + panelHTML(id, item, ctx) + '</section>').join('');
+  $('#drBody').scrollTop = 0;
+
+  const selectTab = id => {
+    $$('.tab', tabsEl).forEach(t => { const on = t.dataset.tab === id; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; });
+    $$('.panel', $('#drBody')).forEach(p => { p.hidden = p.id !== 'panel-' + id; });
+  };
+  tabsEl.onclick = e => { const b = e.target.closest('[data-tab]'); if(b) selectTab(b.dataset.tab); };
+  tabsEl.onkeydown = e => {
+    if(e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const all = $$('.tab', tabsEl); const i = all.indexOf(document.activeElement); if(i === -1) return;
+    const n = all[(i + (e.key === 'ArrowRight' ? 1 : all.length - 1)) % all.length];
+    n.focus(); selectTab(n.dataset.tab); e.preventDefault();
+  };
+  $('#drChange').onclick = () => { closeDrawer(true); $('#bizInput').focus(); };
+
+  const history = [];
+  const gbpGo = $('#gbpGo'); if(gbpGo) gbpGo.onclick = () => doGbp(item, token, history);
+  const blogGo = $('#blogGo'); if(blogGo) blogGo.onclick = () => doBlog(item, token);
+  const resGo = $('#resGo'); if(resGo) resGo.onclick = () => doResearch(item, token);
+
+  $('#drawer').classList.add('open'); $('#scrim').classList.add('open');
+  $('#drawer').setAttribute('aria-hidden', 'false'); document.body.classList.add('noscroll');
+  $('#drClose').focus();
+}
+function closeDrawer(skipFocus){
+  drawerToken++;
+  $('#drawer').classList.remove('open'); $('#scrim').classList.remove('open');
+  $('#drawer').setAttribute('aria-hidden', 'true'); document.body.classList.remove('noscroll');
+  if(!skipFocus && lastTrigger && document.body.contains(lastTrigger)) lastTrigger.focus();
+}
+function setBusy(btn, on, label){
+  if(on){ btn.dataset.label = btn.textContent; btn.textContent = label; btn.disabled = true; }
+  else { btn.textContent = btn.dataset.label || btn.textContent; btn.disabled = false; }
+}
+function visibleCut(t){
+  if(t.length <= 100) return t.length;
+  if(t[100] === ' ') return 100;
+  const sp = t.lastIndexOf(' ', 100);
+  return sp > 60 ? sp : 100;
+}
+
+async function doGbp(item, token, history){
+  const ctx = getCtx(); const btn = $('#gbpGo'), out = $('#gbpOut');
+  const angle = $('#gbpAngle').value.trim(), cta = $('#gbpCta').value;
+  setBusy(btn, true, 'Writing...'); out.innerHTML = '<p class="loading">Writing a short post...</p>';
+  try{
+    const r = await callClaude(gbpPrompt(item, ctx, angle, cta, history));
+    if(token !== drawerToken) return;
+    const text = noDashes(r.text).replace(/```[a-z]*/g, '').replace(/(^|\s)#[A-Za-z]\w*/g, '$1').replace(/^["“]+|["”]+$/g, '').trim();
+    history.push(text);
+    const n = text.length, cut = visibleCut(text);
+    out.innerHTML = '<div class="post"><p class="post-text"><mark>' + esc(text.slice(0, cut)) + '</mark>' + esc(text.slice(cut)) + '</p><span class="cta-chip">' + esc(cta) + '</span></div>' +
+      '<div class="meter' + (n > 1500 ? ' over' : '') + '"><div class="meter-bar"><i style="width:' + Math.min(100, n / 15) + '%"></i></div><span>' + n + ' of 1,500 characters</span></div>' +
+      '<p class="legend"><mark>Highlighted</mark> text is what shows before "more".</p>' +
+      '<div class="actions"><button type="button" class="btn btn-primary btn-sm" id="gbpCopy">Copy post</button><button type="button" class="btn btn-ghost btn-sm" id="gbpAgain">Write another angle</button></div>';
+    $('#gbpCopy').onclick = e => copyText(text, e.currentTarget);
+    $('#gbpAgain').onclick = () => doGbp(item, token, history);
+  }catch(err){
+    console.error(err);
+    if(token !== drawerToken) return;
+    out.innerHTML = '<p class="err-line" role="alert">Could not write the post. ' + esc(friendly(err)) + '</p>';
+  }finally{
+    if(token === drawerToken) setBusy(btn, false);
+  }
+}
+async function doBlog(item, token){
+  const ctx = getCtx(); const btn = $('#blogGo'), out = $('#blogOut');
+  const kws = $('#blogKw').value.trim();
+  setBusy(btn, true, 'Writing...'); out.innerHTML = '<p class="loading">Writing the article. This takes a few seconds...</p>';
+  try{
+    const r = await callClaude(blogPrompt(item, ctx, kws));
+    if(token !== drawerToken) return;
+    const html = sanitizeHtml(noDashes(r.text).replace(/```html|```/g, ''));
+    out.innerHTML = '<div class="article" id="articleBox">' + html + '</div>' + (r.truncated ? '<p class="trunc">This draft hit the length limit and may end early. Write it again, or raise the limit on your server.</p>' : '') +
+      '<div class="actions"><button type="button" class="btn btn-primary btn-sm" id="blogCopy">Copy article</button><button type="button" class="btn btn-ghost btn-sm" id="blogPdf">Save as PDF</button></div>' +
+      '<p class="legend" style="margin-top:12px">Highlighted phrases are good places to link to other pages on the site.</p>';
+    $('#blogCopy').onclick = e => copyText($('#articleBox').innerText, e.currentTarget);
+    $('#blogPdf').onclick = () => printHTML(item.question, '<h1>' + esc(item.question) + '</h1>' + html);
+  }catch(err){
+    console.error(err);
+    if(token !== drawerToken) return;
+    out.innerHTML = '<p class="err-line" role="alert">Could not write the article. ' + esc(friendly(err)) + '</p>';
+  }finally{
+    if(token === drawerToken) setBusy(btn, false);
+  }
+}
+async function doResearch(item, token){
+  const ctx = getCtx(); const btn = $('#resGo'), out = $('#resOut');
+  setBusy(btn, true, 'Researching...'); out.innerHTML = '<p class="loading">Searching the web...</p>';
+  try{
+    const r = await callClaude(researchPrompt(item, ctx), { search:true });
+    if(token !== drawerToken) return;
+    if(r.truncated) throw new Error('The answer was cut off before it finished. Try again.');
+    const j = extractJSON(r.text, false);
+    const list = (title, a) => { a = (Array.isArray(a) ? a : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 4); return a.length ? '<h3>' + title + '</h3><ul>' + a.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : ''; };
+    out.innerHTML = '<div class="res"><h3>What is out there now</h3><p>' + esc(j.summary || 'No summary came back.') + '</p>' + list('Who answers it', j.competitors) + list('Related questions', j.related) + '<h3>Why this rating</h3><p>' + esc(j.reason || '') + '</p></div>';
+  }catch(err){
+    console.error(err);
+    if(token !== drawerToken) return;
+    out.innerHTML = '<p class="err-line" role="alert">Could not research this question. ' + esc(friendly(err)) + '</p>';
+  }finally{
+    if(token === drawerToken) setBusy(btn, false);
+  }
+}
+
+/* ---------- copy, print, export ---------- */
+function showTextModal(title, text){
+  const root = $('#modalRoot');
+  root.innerHTML = '<div class="modal-ov" id="mov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt"><h2 id="mt">' + esc(title) + '</h2><p>Your browser blocked the automatic action. Select the text below and copy it.</p><textarea id="mta" readonly></textarea><div class="actions"><button type="button" class="btn btn-primary btn-sm" id="mclose">Close</button></div></div></div>';
+  const ta = $('#mta'); ta.value = text; ta.focus(); ta.select();
+  const close = () => { root.innerHTML = ''; };
+  $('#mclose').onclick = close;
+  $('#mov').onclick = e => { if(e.target.id === 'mov') close(); };
+  $('#mov').onkeydown = e => { if(e.key === 'Escape'){ e.stopPropagation(); close(); } };
+}
+async function copyText(text, btn){
+  let ok = false;
+  try{ await navigator.clipboard.writeText(text); ok = true; }catch(e){}
+  if(!ok){
+    try{ const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove(); }catch(e){}
+  }
+  if(ok){ const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = old; }, 1600); }
+  else showTextModal('Copy this text', text);
+}
+function printHTML(title, bodyHtml){
+  const doc = '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(title) + '</title><style>body{font:14px/1.6 Georgia,serif;max-width:680px;margin:32px auto;color:#111}h1{font-size:20px}h3{font-size:15px;margin:22px 0 6px}li{margin-bottom:6px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:6px 8px;font:12px sans-serif;text-align:left}</style></head><body>' + bodyHtml + '</body></html>';
+  const f = document.createElement('iframe');
+  f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  f.srcdoc = doc;
+  f.onload = () => {
+    try{ f.contentWindow.focus(); f.contentWindow.print(); }
+    catch(e){ showTextModal('Print blocked', f.contentDocument ? f.contentDocument.body.innerText : title); }
+    setTimeout(() => f.remove(), 60000);
+  };
+  document.body.appendChild(f);
+}
+const csvCell = v => { let s = String(v == null ? '' : v); if(/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+function exportRows(){
+  const rows = [['Question','Topic','Rating','Why','Source','URL']];
+  state.dataset.slice().sort(byOpp).forEach(d => rows.push([d.question, INTENTS[d.intent], d.opportunity || 'unrated', d.reason || '', d.source === 'live' ? (d.domain || '') : 'template idea', d.url || '']));
+  return rows;
+}
+function exportCsv(){
+  const csv = exportRows().map(r => r.map(csvCell).join(',')).join('\n');
+  try{
+    const url = URL.createObjectURL(new Blob([csv], { type:'text/csv' }));
+    const a = document.createElement('a'); a.href = url; a.download = 'questions.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+    setStatus('CSV saved. Nothing downloaded? <button type="button" class="linkbtn" id="csvText">Show it as text</button>', 'ok', true);
+    $('#csvText').onclick = () => showTextModal('Questions as CSV', csv);
+  }catch(e){ showTextModal('Questions as CSV', csv); }
+}
+function exportPdf(){
+  const rows = exportRows();
+  const table = '<h1>' + esc(state.svc + (state.city ? ' in ' + state.city : '')) + '</h1><table>' + rows.map((r, i) => '<tr>' + r.slice(0, 5).map(c => (i ? '<td>' : '<th>') + esc(c) + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>';
+  printHTML('Questions', table);
+}
+
+/* ---------- wiring ---------- */
+function init(){
+  $('#brandName').textContent = CONFIG.brand;
+  document.title = CONFIG.brand + ' | local question research';
+  const saved = { biz:store.get('sp_biz'), kw:store.get('sp_kw'), city:store.get('sp_city') };
+  if(saved.biz) $('#bizInput').value = saved.biz;
+  if(saved.kw) $('#kwInput').value = saved.kw;
+  if(saved.city) $('#cityInput').value = saved.city;
+  updateSign();
+  [['bizInput','sp_biz'],['kwInput','sp_kw'],['cityInput','sp_city']].forEach(([id, key]) => {
+    $('#' + id).addEventListener('input', e => { store.set(key, e.target.value); updateSign(); });
+    $('#' + id).addEventListener('keydown', e => { if(e.key === 'Enter') run(); });
+  });
+  $('#goBtn').onclick = run;
+  $('#gbpDirectBtn').onclick = e => {
+    if(!$('#kwInput').value.trim()){ setStatus('Enter a service or keyword first.', 'err'); $('#kwInput').focus(); return; }
+    openDrawer(null, e.currentTarget);
+  };
+  $('#exportCsv').onclick = exportCsv;
+  $('#exportPdf').onclick = exportPdf;
+  $('#drClose').onclick = () => closeDrawer();
+  $('#scrim').onclick = () => closeDrawer();
+
+  const body = $('#resultsBody');
+  body.addEventListener('click', e => {
+    const open = e.target.closest('[data-open]');
+    if(open){ const item = state.dataset.find(d => d.id === open.dataset.open); if(item) openDrawer(item, open); return; }
+    const rate = e.target.closest('[data-rate]');
+    if(rate){ state.ratingFilter = rate.dataset.rate; renderResults(); return; }
+    if(e.target.closest('#toggleTemplates')){ state.showTemplates = !state.showTemplates; renderResults(); return; }
+    if(e.target.closest('#retryBtn')){ run(); }
+  });
+  body.addEventListener('change', e => { if(e.target.id === 'intentSel'){ state.intentFilter = e.target.value; renderResults(); } });
+
+  document.addEventListener('keydown', e => {
+    const dr = $('#drawer');
+    if(!dr.classList.contains('open')) return;
+    if(e.key === 'Escape' && !$('#mov')){ closeDrawer(); return; }
+    if(e.key === 'Tab' && !$('#mov')){
+      const f = $$('button:not([disabled]),input,select,textarea,a[href],[tabindex]:not([tabindex="-1"])', dr).filter(el => el.offsetParent !== null);
+      if(!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if(e.shiftKey && document.activeElement === first){ last.focus(); e.preventDefault(); }
+      else if(!e.shiftKey && document.activeElement === last){ first.focus(); e.preventDefault(); }
+    }
+  });
+  renderResults();
+}
+init();
+})();
+</script>
+</body>
+</html>
