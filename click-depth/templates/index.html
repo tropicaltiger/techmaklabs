@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buried Pages Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f2f5f7;
+    --panel: #ffffff;
+    --ink: #15252f;
+    --muted: #55656f;
+    --line: #d5dde3;
+    --blue: #1b4fd1;
+    --blue-dark: #153ea5;
+    --buried: #b85c00;
+    --buried-tint: #fbebd3;
+    --ok-tint: #e3eefc;
+    --danger: #b3261e;
+    --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 400 1rem/1.55 var(--body);
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1 {
+    font: 700 clamp(2rem, 5vw, 2.9rem)/1.08 var(--display);
+    letter-spacing: -0.02em; margin: 0 0 .75rem;
+  }
+  h2 { font: 600 1.35rem/1.2 var(--display); margin: 0 0 .35rem; letter-spacing: -0.01em; }
+  .lede { color: var(--muted); max-width: 60ch; margin: 0 0 2rem; font-size: 1.08rem; }
+
+  form {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.4rem; display: grid; gap: 1.1rem;
+  }
+  label { font-weight: 600; display: block; margin-bottom: .3rem; }
+  .hint { color: var(--muted); font-weight: 400; font-size: .92rem; }
+  input[type=text], textarea {
+    width: 100%; font: inherit; color: var(--ink); background: #fff;
+    border: 1px solid #aebac3; border-radius: 6px; padding: .6rem .75rem;
+  }
+  textarea { min-height: 4.2rem; resize: vertical; }
+  input[type=range] { width: 100%; accent-color: var(--blue); }
+  .row { display: grid; gap: 1.1rem; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+  select {
+    font: inherit; padding: .55rem .6rem; border: 1px solid #aebac3; border-radius: 6px; background: #fff;
+    color: var(--ink); width: 100%;
+  }
+  :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  button {
+    font: 600 1rem var(--body); border: 0; border-radius: 6px; cursor: pointer;
+    background: var(--blue); color: #fff; padding: .75rem 1.3rem; justify-self: start;
+  }
+  button:hover { background: var(--blue-dark); }
+  button:disabled { background: #8a98a3; cursor: default; }
+  button.quiet {
+    background: transparent; color: var(--blue); border: 1px solid var(--blue); padding: .5rem .9rem; font-size: .95rem;
+  }
+  button.quiet:hover { background: var(--ok-tint); }
+  .fine { color: var(--muted); font-size: .9rem; margin: 0; }
+
+  #progress { display: none; margin-top: 1.5rem; }
+  .track { height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .fill { height: 100%; width: 0; background: var(--blue); transition: width .4s ease; }
+  #progress p { margin: .5rem 0 0; color: var(--muted); font-size: .95rem; overflow-wrap: anywhere; }
+
+  #error {
+    display: none; margin-top: 1.5rem; border: 1px solid var(--danger); background: #fdecea;
+    color: #7a1912; padding: .8rem 1rem; border-radius: 6px;
+  }
+
+  #results { display: none; margin-top: 2.5rem; }
+  section.block { margin-top: 2.6rem; }
+  .sub { color: var(--muted); margin: 0 0 1rem; max-width: 62ch; }
+  .headline { font: 600 1.25rem/1.35 var(--display); margin: 0 0 .5rem; }
+  .note {
+    background: var(--buried-tint); border-left: 4px solid var(--buried);
+    padding: .65rem .9rem; margin: .8rem 0 0; border-radius: 0 6px 6px 0;
+  }
+
+  /* depth ladder: the main visual */
+  .ladder { display: grid; gap: 6px; margin: 1.2rem 0 .6rem; }
+  .rung { display: grid; grid-template-columns: 5.5rem 1fr 3rem; gap: .7rem; align-items: center; }
+  .rung .lbl { font-weight: 500; font-size: .95rem; }
+  .rung .bar { height: 28px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .rung .bar i { display: block; height: 100%; background: var(--blue); min-width: 3px; }
+  .rung.buried .bar i { background: var(--buried); }
+  .rung.buried .lbl { color: var(--buried); font-weight: 600; }
+  .rung .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .legend { color: var(--muted); font-size: .92rem; }
+
+  .item {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: .85rem 1rem; margin-bottom: .6rem;
+  }
+  .item .url { font-weight: 600; overflow-wrap: anywhere; color: var(--blue); text-decoration: none; }
+  .item .url:hover { text-decoration: underline; }
+  .meta { color: var(--muted); font-size: .92rem; margin-top: .15rem; }
+  .tag {
+    display: inline-block; background: var(--buried); color: #fff; font-weight: 600; font-size: .82rem;
+    padding: .05rem .5rem; border-radius: 99px; margin-right: .5rem; vertical-align: 1px;
+  }
+  details { margin-top: .55rem; }
+  summary { cursor: pointer; font-weight: 500; color: var(--blue-dark); }
+  details ol, details ul { margin: .4rem 0 0; padding-left: 1.3rem; overflow-wrap: anywhere; }
+  details li { margin: .2rem 0; }
+  .why { color: var(--muted); font-size: .9rem; }
+  .empty { background: var(--ok-tint); padding: .8rem 1rem; border-radius: 6px; }
+  .actions { margin-top: 2.6rem; }
+  @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Find the pages your site is hiding</h1>
+  <p class="lede">Enter your website. We count the clicks it takes to reach every page from the homepage, and show which pages are buried, unlinked, or barely linked, with the pages to link from.</p>
+
+  <form id="form">
+    <div>
+      <label for="url">Website</label>
+      <input type="text" id="url" placeholder="https://yourwebsite.com" autocomplete="url" required>
+    </div>
+    <div>
+      <label for="kw">Your target keywords <span class="hint">(optional, one per line)</span></label>
+      <textarea id="kw" placeholder="wedding catering&#10;corporate catering"></textarea>
+      <p class="fine">Buried pages that match a keyword are marked high priority.</p>
+    </div>
+    <div class="row">
+      <div>
+        <label for="pages">Pages to crawl: <span id="pagesVal">100</span></label>
+        <input type="range" id="pages" min="10" max="{{ max_pages_cap }}" step="10" value="100">
+      </div>
+      <div>
+        <label for="deep">Count a page as buried from</label>
+        <select id="deep">
+          <option value="3">3 clicks away</option>
+          <option value="4" selected>4 clicks away</option>
+          <option value="5">5 clicks away</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" id="go">Find buried pages</button>
+    <p class="fine">Reads public pages only, follows robots.txt, and keeps its request rate low.</p>
+  </form>
+
+  <div id="error" role="alert"></div>
+
+  <div id="progress" aria-live="polite">
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <p id="progressText">Starting…</p>
+  </div>
+
+  <div id="results"></div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let timer = null, lastReport = null;
+
+$("pages").addEventListener("input", () => { $("pagesVal").textContent = $("pages").value; });
+
+function el(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else e.setAttribute(k, v);
+  }
+  for (const kid of kids) if (kid != null) e.append(kid.nodeType ? kid : document.createTextNode(kid));
+  return e;
+}
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const clicks = (n) => (n === 0 ? "Homepage" : plural(n, "click", "clicks"));
+
+function showError(msg) { const b = $("error"); b.textContent = msg; b.style.display = "block"; $("progress").style.display = "none"; $("go").disabled = false; }
+
+$("form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  clearTimeout(timer);
+  $("error").style.display = "none"; $("results").style.display = "none";
+  $("go").disabled = true;
+  $("progress").style.display = "block"; $("fill").style.width = "0%"; $("progressText").textContent = "Starting…";
+  try {
+    const res = await fetch("/api/start", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: $("url").value, keywords: $("kw").value, max_pages: $("pages").value, deep: $("deep").value }),
+    });
+    const data = await res.json();
+    if (!res.ok) return showError(data.error || "Something went wrong. Try again.");
+    poll(data.job_id);
+  } catch (e) { showError("Could not reach the server. Check your connection and try again."); }
+});
+
+async function poll(id) {
+  try {
+    const res = await fetch("/api/status/" + id);
+    const s = await res.json();
+    if (!res.ok) return showError(s.error || "This crawl has expired. Start a new one.");
+    if (s.status === "running") {
+      const pct = Math.min(95, Math.round((s.crawled / s.max_pages) * 100));
+      $("fill").style.width = pct + "%";
+      $("progressText").textContent = `Crawled ${s.crawled} of up to ${s.max_pages} pages. ${s.current}`;
+      timer = setTimeout(() => poll(id), 1500);
+    } else if (s.status === "error") {
+      showError(s.error);
+    } else {
+      $("fill").style.width = "100%";
+      $("progress").style.display = "none"; $("go").disabled = false;
+      lastReport = s.report; render(s.report);
+    }
+  } catch (e) { showError("Lost connection while crawling. Try again."); }
+}
+
+function pageItem(p, withDepth) {
+  const li = el("div", { class: "item" });
+  const top = el("div");
+  if (p.priority === "HIGH") top.append(el("span", { class: "tag", text: "Matches your keyword" }));
+  top.append(el("a", { class: "url", href: p.url, target: "_blank", rel: "noopener noreferrer", text: p.url }));
+  li.append(top);
+  const bits = [];
+  if (withDepth) bits.push(clicks(p.depth) + " from the homepage");
+  bits.push(plural(p.inbound_links, "page links", "pages link") + " here");
+  li.append(el("div", { class: "meta", text: bits.join(". ") + "." }));
+
+  if (p.click_path && p.click_path.length > 1) {
+    const ol = el("ol");
+    p.click_path.forEach((u) => ol.append(el("li", { text: u })));
+    li.append(el("details", null, el("summary", { text: "Show the click path" }), ol));
+  }
+  if (p.suggestions && p.suggestions.length) {
+    const ul = el("ul");
+    p.suggestions.forEach((s) => {
+      const row = el("li", null, s.link_from);
+      if (s.shared_topic_words.length) row.append(el("div", { class: "why", text: "Shared topic: " + s.shared_topic_words.join(", ") }));
+      ul.append(row);
+    });
+    li.append(el("details", { open: "" }, el("summary", { text: "Add a link to this page from" }), ul));
+  } else {
+    li.append(el("div", { class: "why", text: "No close topic match found among the top pages. Link to it from your main menu or a category page." }));
+  }
+  return li;
+}
+
+function render(r) {
+  const box = $("results"); box.replaceChildren();
+  const threshold = Number($("deep").value);
+
+  // summary
+  const sum = el("section", { class: "block", style: "margin-top:0" },
+    el("p", { class: "headline", text: `We crawled ${plural(r.pages_crawled, "page", "pages")}. The deepest is ${plural(r.max_depth, "click", "clicks")} from your homepage.` }),
+    el("p", { class: "sub", text: `${plural(r.deep_pages.length, "page is", "pages are")} buried at ${threshold} or more clicks, ${plural(r.orphan_pages.urls.length, "page has", "pages have")} no links pointing to it, and ${plural(r.weakly_linked_pages.length, "page has", "pages have")} only one or two.` }));
+  r.notes.forEach((n) => sum.append(el("div", { class: "note", text: n })));
+  box.append(sum);
+
+  // ladder
+  const dist = r.depth_distribution, maxN = Math.max(...Object.values(dist));
+  const ladder = el("div", { class: "ladder", role: "img", "aria-label": "Number of pages at each click depth" });
+  Object.keys(dist).map(Number).sort((a, b) => a - b).forEach((d) => {
+    const bar = el("div", { class: "bar" }, el("i", { style: `width:${(dist[d] / maxN) * 100}%` }));
+    ladder.append(el("div", { class: "rung" + (d >= threshold ? " buried" : "") },
+      el("span", { class: "lbl", text: clicks(d) }), bar, el("span", { class: "n", text: String(dist[d]) })));
+  });
+  box.append(el("section", { class: "block" },
+    el("h2", { text: "How deep your pages sit" }),
+    el("p", { class: "sub", text: "Each bar is the number of pages that need that many clicks from the homepage. Search engines visit deep pages less often." }),
+    ladder, el("div", { class: "legend", text: `Orange bars are buried: ${threshold} or more clicks.` })));
+
+  // buried
+  const deepSec = el("section", { class: "block" }, el("h2", { text: "Buried pages" }),
+    el("p", { class: "sub", text: "Pages your keywords should rank for come first, then the deepest." }));
+  if (r.deep_pages.length) r.deep_pages.slice(0, 40).forEach((p) => deepSec.append(pageItem(p, true)));
+  else deepSec.append(el("div", { class: "empty", text: `No page is ${threshold} or more clicks deep. Your structure is shallow.` }));
+  if (r.deep_pages.length > 40) deepSec.append(el("p", { class: "fine", text: `Showing the first 40 of ${r.deep_pages.length}. Download the report for the full list.` }));
+  box.append(deepSec);
+
+  // orphans
+  const orSec = el("section", { class: "block" }, el("h2", { text: "Pages with no links to them" }),
+    el("p", { class: "sub", text: "These are in your sitemap, but no page we crawled links to them. Visitors and search engines can't reach them by clicking." }));
+  if (r.orphan_pages.urls.length) {
+    orSec.append(el("p", { class: "fine", text: r.orphan_pages.status.charAt(0).toUpperCase() + r.orphan_pages.status.slice(1) + "." }));
+    r.orphan_pages.urls.slice(0, 40).forEach((u) =>
+      orSec.append(el("div", { class: "item" }, el("a", { class: "url", href: u, target: "_blank", rel: "noopener noreferrer", text: u }))));
+    if (r.orphan_pages.urls.length > 40) orSec.append(el("p", { class: "fine", text: `Showing the first 40 of ${r.orphan_pages.urls.length}.` }));
+  } else orSec.append(el("div", { class: "empty", text: "Every page in your sitemap is linked from somewhere. If you have no sitemap.xml, we can't check this." }));
+  box.append(orSec);
+
+  // weak
+  const wk = el("section", { class: "block" }, el("h2", { text: "Barely linked pages" }),
+    el("p", { class: "sub", text: "Close to the homepage, but only one or two pages link to them. Pages like Contact are often fine here." }));
+  if (r.weakly_linked_pages.length) r.weakly_linked_pages.slice(0, 25).forEach((p) => wk.append(pageItem(p, false)));
+  else wk.append(el("div", { class: "empty", text: "Every page has three or more links pointing to it." }));
+  box.append(wk);
+
+  const dl = el("button", { class: "quiet", type: "button", text: "Download full report (JSON)" });
+  dl.addEventListener("click", () => {
+    const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(lastReport, null, 2)], { type: "application/json" })), download: "click-depth-report.json" });
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+  box.append(el("div", { class: "actions" }, dl));
+
+  box.style.display = "block";
+  box.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+</script>
+</body>
+</html>
