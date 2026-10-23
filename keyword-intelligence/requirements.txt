@@ -1,1 +1,1 @@
-# No third-party Python packages required.\n
+# Python standard library only

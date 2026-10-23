@@ -1,36 +1,33 @@
-# Tech Mak Labs — Keyword Intelligence (Prototype v0.5)
+# Tech Mak Labs — Keyword Intelligence v0.6
 
-A lightweight SEO research app that combines Google Search Console CSV evidence with a public website content scan.
+A lightweight, GitHub/Railway-ready prototype that combines Google Search Console CSV analysis with a cautious public-site content scan.
 
-## Run locally
-- Python 3.9+ recommended
-- `python server.py`
-- Open `http://localhost:8080`
+## What's new in v0.6
+- Sitemap-assisted URL discovery using same-domain sitemap entries and sitemap declarations in robots.txt.
+- Internal-link crawling remains enabled, with a maximum of 30 visited pages per scan.
+- Compares target keywords with page titles, H1/H2/H3 headings and extracted page text.
+- Reports evidence and suggested next steps without treating exact-phrase absence as proof a page is irrelevant.
+- GSC CSVs are parsed in the browser; no Google or Anthropic API key is required.
 
-No third-party Python packages, paid SEO API, or database are required for this prototype.
+## Deploy on Railway
+1. Upload these files to a GitHub repository (root directory).
+2. Create a Railway project from that repository.
+3. Railway detects `requirements.txt` and `Procfile`; the app listens on the `PORT` environment variable.
+4. Open the public URL and test the website scan.
 
-## Deploy to Railway
-1. Upload the contents of this folder to the root of a GitHub repository.
-2. In Railway, create a project from that GitHub repository.
-3. Railway should detect the `Procfile`; the start command is `python server.py`.
-4. Deploy and open the generated public domain.
+## Files
+- `index.html` — browser UI and CSV analysis.
+- `server.py` — HTTP server and bounded same-domain public HTML crawler.
+- `requirements.txt` — no third-party dependencies required.
+- `Procfile` — Railway start command.
 
-## Current capabilities
-- 50 preloaded DivineCare Physio target keywords
-- Import Search Console Queries and Pages CSV exports
-- Import multiple query-filtered Pages CSV exports to map query → URL
-- Website content scan: up to 30 same-domain HTML pages per run
-- Compare target phrases against page titles, H1/H2/H3 headings and visible text
-- Flag potential content gaps and title/H1 placement gaps
-- Potential URL overlap review and CSV exports
-- CSV processing remains in the browser; the crawler fetches only public pages on the server
+## Current limits
+- Up to 30 pages per scan; sitemap discovery is capped to avoid unbounded crawling.
+- Static HTML extraction only. JavaScript-rendered content may be missing.
+- The crawler is not a full technical SEO audit and does not fetch live Google rankings, search volume, competitor metrics, or map-pack results.
+- General Queries and Pages exports do not reveal a definitive query-to-URL relationship; use query-filtered Pages exports for that evidence.
+- No ranking guarantees. Review intent and page quality before changing URLs or creating pages.
 
-## Important limitations
-- This is a prototype, not a multi-user product; no accounts, database, or persistent project storage.
-- Website scan is a lightweight HTML crawler, not a full browser. JavaScript-rendered content may be missed. Pages blocked by site access controls, robots restrictions, timeouts, or server responses may not be scanned.
-- Maximum 30 pages per scan. It does not fetch live rankings, search volumes, competitor data, or Google Business Profile data.
-- Exact phrase absence is not proof of a topic gap; synonyms and semantic relevance need human review.
-- Multiple URLs for one query are a review signal, not definitive cannibalization.
-- This server-side crawler is intended for a controlled prototype. Before public multi-user launch, add rate limiting, stronger DNS-rebinding protections, crawl policy/robots handling, request logging, and abuse controls.
-
-Never paste Google passwords or API keys into the app.
+## Security and cost
+- No secret keys are required for this version.
+- The crawler accepts public HTTP/HTTPS URLs only, rejects private/local IP addresses, limits response sizes and stays on the same hostname.
