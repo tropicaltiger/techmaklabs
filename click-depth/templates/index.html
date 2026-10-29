@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buried Pages Finder</title>
+<title>Click Depth | Tech Mak Labs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
@@ -29,7 +29,20 @@
     margin: 0; background: var(--paper); color: var(--ink);
     font: 400 1rem/1.55 var(--body);
   }
-  main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  main { width: min(100% - 3rem, 1500px); margin: 0 auto; padding: 1.5rem 0 2.5rem; }
+  .site-header, .site-footer { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .site-header { padding: .25rem 0 1.5rem; border-bottom:1px solid var(--line); margin-bottom:2rem; }
+  .brand { color:var(--ink); text-decoration:none; font:700 1.1rem var(--display); }
+  .home-link { color:var(--blue); font-weight:600; text-decoration:none; }
+  .home-link:hover { text-decoration:underline; }
+  .intro { max-width: 980px; }
+  #results { width:100%; }
+  .site-footer { border-top:1px solid var(--line); margin-top:3rem; padding-top:1.2rem; color:var(--muted); font-size:.9rem; }
+  .site-footer a { color:var(--blue); text-decoration:none; }
+  .results-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.2rem; }
+  .results-grid > .block { min-width:0; margin-top:1.4rem; }
+  .item { min-width:0; }
+  @media (max-width: 760px) { main { width: min(100% - 1.5rem, 1500px); padding-top:1rem; } .results-grid { grid-template-columns:1fr; } }
   h1 {
     font: 700 clamp(2rem, 5vw, 2.9rem)/1.08 var(--display);
     letter-spacing: -0.02em; margin: 0 0 .75rem;
@@ -121,8 +134,14 @@
 </head>
 <body>
 <main>
+  <header class="site-header">
+    <a class="brand" href="https://techmaklabs.com/" aria-label="Tech Mak Labs home">Tech Mak Labs <span style="font-weight:500;color:var(--muted)">/ Click Depth</span></a>
+    <a class="home-link" href="https://techmaklabs.com/">← Back to Home</a>
+  </header>
+  <div class="intro">
   <h1>Find the pages your site is hiding</h1>
-  <p class="lede">Enter your website. We count the clicks it takes to reach every page from the homepage, and show which pages are buried, unlinked, or barely linked, with the pages to link from.</p>
+  <p class="lede">Enter your website. We count the clicks it takes to reach pages from the homepage and identify buried pages, confirmed sitemap orphans, and weakly linked content—with suggestions for relevant pages to link from.</p>
+  </div>
 
   <form id="form">
     <div>
@@ -160,6 +179,10 @@
   </div>
 
   <div id="results"></div>
+  <footer class="site-footer">
+    <span>Reads public pages only, respects robots.txt, and uses a low request rate.</span>
+    <span>Developed by <a href="https://techmaklabs.com/">Tech Mak Labs</a></span>
+  </footer>
 </main>
 
 <script>
@@ -227,6 +250,7 @@ function pageItem(p, withDepth) {
   const bits = [];
   if (withDepth) bits.push(clicks(p.depth) + " from the homepage");
   bits.push(plural(p.inbound_links, "page links", "pages link") + " here");
+  if (p.matched_keywords && p.matched_keywords.length) bits.push("Matches: " + p.matched_keywords.join(", "));
   li.append(el("div", { class: "meta", text: bits.join(". ") + "." }));
 
   if (p.click_path && p.click_path.length > 1) {
@@ -237,8 +261,10 @@ function pageItem(p, withDepth) {
   if (p.suggestions && p.suggestions.length) {
     const ul = el("ul");
     p.suggestions.forEach((s) => {
-      const row = el("li", null, s.link_from);
-      if (s.shared_topic_words.length) row.append(el("div", { class: "why", text: "Shared topic: " + s.shared_topic_words.join(", ") }));
+      const row = el("li");
+      row.append(el("a", { href: s.link_from, target: "_blank", rel: "noopener noreferrer", text: s.link_from }));
+      if (s.shared_topic_words.length) row.append(el("div", { class: "why", text: "Shared topic terms: " + s.shared_topic_words.join(", ") }));
+      if (s.rationale) row.append(el("div", { class: "why", text: s.rationale + " Confidence: " + (s.confidence || "low") + "." }));
       ul.append(row);
     });
     li.append(el("details", { open: "" }, el("summary", { text: "Add a link to this page from" }), ul));
@@ -255,7 +281,7 @@ function render(r) {
   // summary
   const sum = el("section", { class: "block", style: "margin-top:0" },
     el("p", { class: "headline", text: `We crawled ${plural(r.pages_crawled, "page", "pages")}. The deepest is ${plural(r.max_depth, "click", "clicks")} from your homepage.` }),
-    el("p", { class: "sub", text: `${plural(r.deep_pages.length, "page is", "pages are")} buried at ${threshold} or more clicks, ${plural(r.orphan_pages.urls.length, "page has", "pages have")} no links pointing to it, and ${plural(r.weakly_linked_pages.length, "page has", "pages have")} only one or two.` }));
+    el("p", { class: "sub", text: `${plural(r.deep_pages.length, "page is", "pages are")} buried at ${threshold} or more clicks, ${plural(r.orphan_pages.urls.length, "page is", "pages are")} confirmed sitemap orphan(s), and ${plural(r.weakly_linked_pages.length, "page has", "pages have")} only one or two inbound links.` }));
   r.notes.forEach((n) => sum.append(el("div", { class: "note", text: n })));
   box.append(sum);
 
@@ -272,36 +298,45 @@ function render(r) {
     el("p", { class: "sub", text: "Each bar is the number of pages that need that many clicks from the homepage. Search engines visit deep pages less often." }),
     ladder, el("div", { class: "legend", text: `Orange bars are buried: ${threshold} or more clicks.` })));
 
+  const reportGrid = el("div", { class: "results-grid" });
+  box.append(reportGrid);
+
   // buried
   const deepSec = el("section", { class: "block" }, el("h2", { text: "Buried pages" }),
     el("p", { class: "sub", text: "Pages your keywords should rank for come first, then the deepest." }));
   if (r.deep_pages.length) r.deep_pages.slice(0, 40).forEach((p) => deepSec.append(pageItem(p, true)));
   else deepSec.append(el("div", { class: "empty", text: `No page is ${threshold} or more clicks deep. Your structure is shallow.` }));
   if (r.deep_pages.length > 40) deepSec.append(el("p", { class: "fine", text: `Showing the first 40 of ${r.deep_pages.length}. Download the report for the full list.` }));
-  box.append(deepSec);
+  reportGrid.append(deepSec);
 
   // orphans
   const orSec = el("section", { class: "block" }, el("h2", { text: "Pages with no links to them" }),
-    el("p", { class: "sub", text: "These are in your sitemap, but no page we crawled links to them. Visitors and search engines can't reach them by clicking." }));
+    el("p", { class: "sub", text: "These are in your sitemap, but no crawled page links to them. When a crawl hits its page limit, treat these as possible orphans because an uncrawled page may link to them." }));
   if (r.orphan_pages.urls.length) {
-    orSec.append(el("p", { class: "fine", text: r.orphan_pages.status.charAt(0).toUpperCase() + r.orphan_pages.status.slice(1) + "." }));
+    orSec.append(el("p", { class: "fine", text: r.orphan_pages.status.charAt(0).toUpperCase() + r.orphan_pages.status.slice(1) + ". No crawled page links to these sitemap URLs; this is strong evidence of orphaning when the crawl is complete, and uncertain if the page limit was reached." }));
     r.orphan_pages.urls.slice(0, 40).forEach((u) =>
       orSec.append(el("div", { class: "item" }, el("a", { class: "url", href: u, target: "_blank", rel: "noopener noreferrer", text: u }))));
     if (r.orphan_pages.urls.length > 40) orSec.append(el("p", { class: "fine", text: `Showing the first 40 of ${r.orphan_pages.urls.length}.` }));
-  } else orSec.append(el("div", { class: "empty", text: "Every page in your sitemap is linked from somewhere. If you have no sitemap.xml, we can't check this." }));
-  box.append(orSec);
+  } else orSec.append(el("div", { class: "empty", text: "No sitemap URLs without incoming links were found in the crawl data. If the crawl hit its page limit, some link relationships may still be unknown." }));
+  if (r.orphan_pages.not_crawled_count) {
+    orSec.append(el("p", { class: "note", text: `${r.orphan_pages.not_crawled_count} sitemap URL(s) were linked from crawled pages but not fetched before the crawl stopped. Their depth and inbound-link counts are incomplete; see not_crawled_urls in the JSON report.` }));
+    const pending = r.orphan_pages.not_crawled_urls || [];
+    pending.slice(0, 15).forEach((u) => orSec.append(el("div", { class: "item" }, el("a", { class: "url", href: u, target: "_blank", rel: "noopener noreferrer", text: u }), el("div", { class: "meta", text: "Not crawled — inbound links unknown" }))));
+    if (pending.length > 15) orSec.append(el("p", { class: "fine", text: `Showing 15 of ${pending.length} not-crawled sitemap URLs in this section; download the JSON for the complete list.` }));
+  }
+  reportGrid.append(orSec);
 
   // weak
   const wk = el("section", { class: "block" }, el("h2", { text: "Barely linked pages" }),
     el("p", { class: "sub", text: "Close to the homepage, but only one or two pages link to them. Pages like Contact are often fine here." }));
   if (r.weakly_linked_pages.length) r.weakly_linked_pages.slice(0, 25).forEach((p) => wk.append(pageItem(p, false)));
   else wk.append(el("div", { class: "empty", text: "Every page has three or more links pointing to it." }));
-  box.append(wk);
+  reportGrid.append(wk);
 
   const dl = el("button", { class: "quiet", type: "button", text: "Download full report (JSON)" });
   dl.addEventListener("click", () => {
     const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(lastReport, null, 2)], { type: "application/json" })), download: "click-depth-report.json" });
-    a.click(); URL.revokeObjectURL(a.href);
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
   box.append(el("div", { class: "actions" }, dl));
 

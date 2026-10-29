@@ -36,14 +36,42 @@ STOPWORDS = set(
 
 # ----------------------------------------------------------------- helpers
 def normalize(url):
-    """Drop fragments and tracking params, lowercase host, strip trailing slash."""
-    url, _ = urldefrag(url.strip())
+    """Canonicalize URL syntax while preserving the site's actual host and scheme."""
+    url, _ = urldefrag((url or "").strip())
     p = urlparse(url)
-    query = [(k, v) for k, v in parse_qsl(p.query) if not k.lower().startswith(TRACKING)]
+    scheme = p.scheme.lower()
+    host = (p.hostname or "").lower()
+    if not scheme or not host:
+        return url
+    try:
+        port = p.port
+    except ValueError:
+        port = None
+    netloc = host
+    if port and not ((scheme == "http" and port == 80) or (scheme == "https" and port == 443)):
+        netloc = f"{host}:{port}"
+    query = sorted((k, v) for k, v in parse_qsl(p.query, keep_blank_values=True)
+                   if not any(k.lower().startswith(t) for t in TRACKING))
     path = p.path or "/"
     if path != "/" and path.endswith("/"):
         path = path.rstrip("/")
-    return p._replace(netloc=p.netloc.lower(), path=path, query=urlencode(query)).geturl()
+    return p._replace(scheme=scheme, netloc=netloc, path=path,
+                      params="", query=urlencode(query, doseq=True), fragment="").geturl()
+
+
+def is_low_value_url(url):
+    """Exclude common technical/archive URLs from orphan-content recommendations."""
+    p = urlparse(url)
+    path = p.path.lower().rstrip("/") or "/"
+    if path.endswith(("/feed", "/rss", "/rss.xml", "/comments/feed")):
+        return True
+    if re.search(r"/(author|tag|category)/[^/]+(?:/page/\d+)?$", path):
+        return True
+    if re.search(r"/page/\d+$", path):
+        return True
+    if any(k.lower() in {"feed", "output"} for k, _ in parse_qsl(p.query)):
+        return True
+    return False
 
 
 def tokens(text):
@@ -52,8 +80,8 @@ def tokens(text):
 
 
 def same_site(url, host):
-    h = urlparse(url).netloc.lower()
-    return h == host or h == "www." + host or "www." + h == host
+    h = (urlparse(url).hostname or "").lower().removeprefix("www.")
+    return h == host.lower().removeprefix("www.")
 
 
 # ----------------------------------------------------------------- fetching
@@ -129,6 +157,7 @@ def crawl(start_url, max_pages=300, delay=0.5, fetch=None, sitemap_fetch=None,
     from bs4 import BeautifulSoup
 
     pages, queue, queued = {}, deque([(start, 0, None)]), {start}
+    aliases = {}  # requested URL -> final URL after redirects
     truncated = False
 
     while queue:
@@ -143,8 +172,13 @@ def crawl(start_url, max_pages=300, delay=0.5, fetch=None, sitemap_fetch=None,
         if html is None:
             continue
         final_url = normalize(final_url)
-        if final_url != url and final_url in pages:
-            continue  # redirected onto a page we already have
+        if final_url != url:
+            aliases[url] = final_url
+        if final_url in pages:
+            # A second route redirected to a page already crawled. Keep its alias
+            # so links and sitemap entries resolve to the same graph node.
+            aliases[url] = final_url
+            continue
 
         soup = BeautifulSoup(html, "html.parser")
         title = soup.title.get_text(strip=True) if soup.title else ""
@@ -182,14 +216,31 @@ def crawl(start_url, max_pages=300, delay=0.5, fetch=None, sitemap_fetch=None,
         if delay:
             time.sleep(delay)
 
-    # Build inlinks (only counting links from pages we actually crawled).
-    for src, info in pages.items():
-        for t in info["outlinks"]:
-            if t in pages:
-                pages[t]["inlinks"].add(src)
+    def resolve_alias(url):
+        seen = set()
+        while url in aliases and url not in seen:
+            seen.add(url)
+            url = aliases[url]
+        return url
 
-    sitemap_urls = read_sitemap(start, sitemap_fetch)
-    return {"start": start, "pages": pages, "sitemap_urls": sitemap_urls, "truncated": truncated}
+    # Resolve redirect aliases before building the graph. This prevents false
+    # zero-inbound counts and self-link recommendations caused by URL variants.
+    for src, info in pages.items():
+        resolved = set()
+        for target in info["outlinks"]:
+            target = resolve_alias(target)
+            if target in pages and target != src:
+                resolved.add(target)
+        info["outlinks"] = resolved
+        info["inlinks"] = set()
+    for src, info in pages.items():
+        for target in info["outlinks"]:
+            pages[target]["inlinks"].add(src)
+
+    sitemap_urls = [resolve_alias(u) for u in read_sitemap(start, sitemap_fetch)]
+    return {"start": resolve_alias(start), "pages": pages,
+            "sitemap_urls": sorted(set(sitemap_urls)), "truncated": truncated,
+            "aliases": aliases}
 
 
 # ----------------------------------------------------------------- analysis
@@ -204,7 +255,11 @@ def path_to(pages, url):
 
 def suggest_linkers(pages, target, max_depth=2, n=3):
     """Pick shallow pages whose topic overlaps the target and that don't link to it yet."""
-    t_tokens = pages[target]["tokens"] if target in pages else set()
+    # Canonical URL identity matters: never recommend a self-link or an edge
+    # that already exists in the graph.
+    if target not in pages:
+        return []
+    t_tokens = pages[target]["tokens"]
     scored = []
     for url, info in pages.items():
         if url == target or info["depth"] > max_depth or target in info["outlinks"]:
@@ -213,10 +268,17 @@ def suggest_linkers(pages, target, max_depth=2, n=3):
         if overlap:
             scored.append((overlap, -info["depth"], url))
     scored.sort(reverse=True)
-    return [
-        {"link_from": u, "shared_topic_words": sorted(t_tokens & pages[u]["tokens"])}
-        for _, _, u in scored[:n]
-    ]
+    results = []
+    for overlap, neg_depth, url in scored[:n]:
+        shared = sorted(t_tokens & pages[url]["tokens"])
+        results.append({
+            "link_from": url,
+            "shared_topic_words": shared,
+            "target_url": target,
+            "rationale": "Shares topic terms with the target and does not currently link to it.",
+            "confidence": "medium" if overlap >= 3 else "low",
+        })
+    return results
 
 
 def analyze(site, deep_threshold=4, weak_threshold=2, keywords=None):
@@ -224,8 +286,12 @@ def analyze(site, deep_threshold=4, weak_threshold=2, keywords=None):
     keywords = [k.lower() for k in (keywords or [])]
     kw_tokens = [tokens(k) for k in keywords]
 
+    def matched_keywords(info):
+        return [keywords[i] for i, kt in enumerate(kw_tokens)
+                if kt and kt <= info["tokens"]]
+
     def is_money_page(info):
-        return any(kt and kt <= info["tokens"] for kt in kw_tokens)
+        return bool(matched_keywords(info))
 
     # Distribution
     dist = Counter(info["depth"] for info in pages.values())
@@ -239,24 +305,38 @@ def analyze(site, deep_threshold=4, weak_threshold=2, keywords=None):
                 "depth": info["depth"],
                 "inbound_links": len(info["inlinks"]),
                 "priority": "HIGH" if is_money_page(info) else "normal",
+                "matched_keywords": matched_keywords(info),
                 "click_path": path_to(pages, url),
                 "suggestions": suggest_linkers(pages, url),
             })
     deep.sort(key=lambda d: (d["priority"] != "HIGH", -d["depth"]))
 
-    # Orphans: in sitemap but never linked from a crawled page
+    # Sitemap candidates are split into genuinely observed orphans and URLs that
+    # were not crawled (whose inbound-link status cannot be inferred reliably).
     crawled = set(pages)
-    sitemap_only = [u for u in site["sitemap_urls"] if u not in crawled]
+    sitemap_candidates = [u for u in site["sitemap_urls"] if not is_low_value_url(u)]
+    linked_from_crawl = {target for info in pages.values() for target in info["outlinks"]}
+    # These URLs were not linked from any crawled page. With a complete crawl this
+    # is strong evidence of an orphan; after a page-limit stop it remains uncertain
+    # because an uncrawled page could contain the missing link.
+    unlinked_sitemap_urls = [u for u in sitemap_candidates
+                             if u != site["start"] and u not in linked_from_crawl]
+    not_crawled = [u for u in sitemap_candidates
+                   if u not in crawled and u in linked_from_crawl]
     orphans = {
-        "status": "uncertain - crawl hit the page limit, these may just be undiscovered"
-        if site["truncated"] else "confirmed - in sitemap but not linked from anywhere crawled",
-        "urls": sitemap_only,
+        "status": "uncertain - crawl reached its page limit" if site["truncated"]
+                  else "not linked from any crawled page",
+        "urls": sorted(set(unlinked_sitemap_urls)),
+        "not_crawled_urls": sorted(set(not_crawled)),
+        "not_crawled_count": len(set(not_crawled)),
+        "excluded_low_value_count": len(site["sitemap_urls"]) - len(sitemap_candidates),
     }
 
     # Weakly linked (shallow but only 1-2 inbound links, excluding homepage)
     weak = [
         {"url": u, "depth": i["depth"], "inbound_links": len(i["inlinks"]),
          "priority": "HIGH" if is_money_page(i) else "normal",
+         "matched_keywords": matched_keywords(i),
          "suggestions": suggest_linkers(pages, u)}
         for u, i in pages.items()
         if u != site["start"] and len(i["inlinks"]) <= weak_threshold and i["depth"] < deep_threshold
@@ -265,8 +345,12 @@ def analyze(site, deep_threshold=4, weak_threshold=2, keywords=None):
 
     notes = []
     if site["truncated"]:
-        notes.append(f"Crawled {len(pages)} pages and stopped at the limit; "
-                     "deeper pages may exist, so depth figures are incomplete.")
+        notes.append(f"Crawled {len(pages)} pages and reached the selected limit; "
+                     "depth and link findings cover only the pages discovered within this crawl.")
+    if orphans["not_crawled_count"]:
+        notes.append(f"{orphans['not_crawled_count']} sitemap URL(s) were linked from crawled pages but not crawled before the limit; their depth and inbound-link counts are incomplete.")
+    if orphans["excluded_low_value_count"]:
+        notes.append(f"Excluded {orphans['excluded_low_value_count']} feed, archive, or pagination URL(s) from content-orphan recommendations.")
     return {
         "pages_crawled": len(pages),
         "max_depth": max(dist) if dist else 0,

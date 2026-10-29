@@ -1,13 +1,17 @@
-# Buried Pages Finder
+# Click Depth — Tech Mak Labs
 
 Crawls a website and shows how many clicks every page is from the homepage.
 It reports:
 
 - **Buried pages**: 4 or more clicks deep (you can change this), with the click path
   and suggested pages to link from
-- **Orphan pages**: listed in `sitemap.xml` but not linked from any crawled page
+- **Sitemap pages with no incoming links**: sitemap URLs not linked from any crawled page, with a warning when the crawl reaches its page limit
+- **Not-crawled URLs**: sitemap URLs linked from discovered pages but not fetched before the crawl stopped
 - **Barely linked pages**: only one or two internal links point to them
-- Target keywords (optional): buried pages that match a keyword are marked high priority
+- Target keywords (optional): buried and weakly linked pages that match all meaningful keyword terms are marked high priority
+- Redirect-aware URL normalization to reduce duplicate pages and false inbound-link counts
+- Relevant link suggestions exclude the target page itself and links that already exist
+- Responsive full-width interface with a home link and Tech Mak Labs attribution
 
 ## Files
 
